@@ -31,7 +31,7 @@ $ cd Time
 $ git archive HEAD --output=../Time.zip
 ```
 
-## NTP library (by exabugs)
+## NTP library (by exabugs-san)
 
 ```
 $ git clone https://github.com/exabugs/sketchLibraryNTP NTP
