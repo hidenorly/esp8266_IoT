@@ -41,6 +41,12 @@ const char* NTP_SERVER = "jp.pool.ntp.org";
 int HTTP_SERVER_PORT = 80;
 const char* HTML_HEAD = "<html><head><title>hidenorly's ESP8266</title></head><body>";
 
+// --- config: sensor support
+#define ENABLE_I2C_BUS
+#define ENABLE_SENSOR
+#define ENABLE_SENSOR_PRESSURE 1
+#define ENABLE_TEMPERATURE_PRESSURE 1
+
 // --- GPIO config
 void setOutputAndValue(int port, int initialVal) {
   digitalWrite(port, initialVal); // Output data should be set first (before direction setting)
@@ -50,8 +56,12 @@ void setOutputAndValue(int port, int initialVal) {
 void initializeGPIO() {
   // General config : BOOT MODE (GPIO0,2,15) related
   pinMode(0, INPUT);
+#ifdef ENABLE_I2C_BUS
   pinMode(2, INPUT_PULLUP);   // for I2C
   pinMode(14, INPUT_PULLUP);  // for I2C
+#else // ENABLE_I2C_BUS
+  pinMode(2, INPUT);
+#endif // ENABLE_I2C_BUS
   pinMode(15, INPUT);
 
   // Project related config
@@ -62,7 +72,9 @@ void initializeGPIO() {
   setOutputAndValue(5, HIGH);
   setOutputAndValue(12, HIGH);
   setOutputAndValue(13, HIGH);
-//  setOutputAndValue(14, HIGH);
+#ifndef ENABLE_I2C_BUS
+  setOutputAndValue(14, HIGH);
+#endif // ENABLE_I2C_BUS
   setOutputAndValue(16, HIGH);
 }
 
@@ -86,8 +98,11 @@ void onWiFiClientConnected(){
   start_NTP(); // socket related is need to be executed in main loop.
 }
 
-#define NUM_OF_SENSORS  2
-ISensor* pSensors[2];
+#ifdef ENABLE_SENSOR
+#define NUM_OF_SENSORS  (ENABLE_SENSOR_PRESSURE+ENABLE_TEMPERATURE_PRESSURE)
+ISensor* g_pSensors[NUM_OF_SENSORS];
+int g_NUM_SENSORS=0;
+#endif // ENABLE_SENSOR
 
 // --- debug
 void periodicTask(void* p){
@@ -98,16 +113,20 @@ void periodicTask(void* p){
   DEBUG_PRINT("UTC : ");
   DEBUG_PRINTLN(s);
 
-  if( pSensors ){
-    for(int i=0; i<NUM_OF_SENSORS; i++){
-      DEBUG_PRINT(pSensors[i]->getName());
-      DEBUG_PRINT(" :");
-      DEBUG_PRINT(pSensors[i]->getFloatValue());
-      DEBUG_PRINT(" [");
-      DEBUG_PRINT(pSensors[i]->getUnit());
-      DEBUG_PRINTLN("]");
+#ifdef ENABLE_SENSOR
+  if( g_pSensors ){
+    for(int i=0; i<g_NUM_SENSORS; i++){
+      if( g_pSensors[i]!=NULL){
+        DEBUG_PRINT(g_pSensors[i]->getName());
+        DEBUG_PRINT(" :");
+        DEBUG_PRINT(g_pSensors[i]->getFloatValue());
+        DEBUG_PRINT(" [");
+        DEBUG_PRINT(g_pSensors[i]->getUnit());
+        DEBUG_PRINTLN("]");
+      }
     }
   }
+#endif // ENABLE_SENSOR
 }
 
 // --- General setup() function
@@ -125,12 +144,20 @@ void setup() {
   delay(1000);
   initializeProperMode();
 
-  // sensor debug
-  pSensors[0]= new PressureSensor();
-  pSensors[1]= new TemperatureSensor();
-  for(int i=0; i<NUM_OF_SENSORS; i++){
-    pSensors[i]->initialize();
+#ifdef ENABLE_SENSOR
+  // Initialize sensor
+  int n=0;
+#ifdef ENABLE_SENSOR_PRESSURE
+  g_pSensors[n++] = new PressureSensor();
+#endif // ENABLE_SENSOR_PRESSURE
+#ifdef ENABLE_TEMPERATURE_PRESSURE
+  g_pSensors[n++] = new TemperatureSensor();
+#endif // ENABLE_TEMPERATURE_PRESSURE
+  g_NUM_SENSORS = n;
+  for(int i=0; i<n; i++){
+    g_pSensors[i]->initialize();
   }
+#endif // ENABLE_SENSOR
 
   // register periodic tasks which need to be called from loop() when the timer are activated.
   g_LooperThreadManager.add( new LooperThreadTicker(reinterpret_cast<LooperThreadTicker::CALLBACK_FUNC>(periodicTask), NULL, 1000) );
