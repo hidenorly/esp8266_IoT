@@ -14,20 +14,26 @@
  limitations under the License.
 */
 
-#ifndef __BASE_H__
-#define __BASE_H__
+#ifndef __TEMPERATURE_SENSOR_H__
+#define __TEMPERATURE_SENSOR_H__
 
-#include "Arduino.h"
+#include "SensorBase.h"
+#include "BMP180.h"
 
-// --- debug macro
-#ifndef DEBUG_PRINT
-#define DEBUG_PRINT Serial.print
-#endif  // DEBUG_PRINT
+class TemperatureSensor:public ISensor
+{
+  public:
+    TemperatureSensor();
+    ~TemperatureSensor();
+    virtual void initialize(void);
+    virtual void uninitialize(void);
+    virtual int getIntValue(void);
+    virtual float getFloatValue(void);
+    virtual const char* getUnit(void);
+    virtual const char* getName(void);
 
-#ifndef DEBUG_PRINTLN
-#define DEBUG_PRINTLN Serial.println
-#endif  // DEBUG_PRINTLN
+  protected:
+    BMP180* m_pSensorDriver;
+};
 
-class CTrackerParam;
-
-#endif // __BASE_H__
+#endif // __TEMPERATURE_SENSOR_H__

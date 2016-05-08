@@ -14,20 +14,22 @@
  limitations under the License.
 */
 
-#ifndef __BASE_H__
-#define __BASE_H__
+#ifndef __ISENSOR_H__
+#define __ISENSOR_H__
 
-#include "Arduino.h"
+#include "base.h"
 
-// --- debug macro
-#ifndef DEBUG_PRINT
-#define DEBUG_PRINT Serial.print
-#endif  // DEBUG_PRINT
+class ISensor
+{
+  public:
+    virtual ~ISensor(){};
+    virtual void initialize(void){};
+    virtual void uninitialize(void){};
+    virtual int getIntValue(void)=0;
+    virtual float getFloatValue(void)=0;
+    virtual const char* getUnit(void)=0;
+    virtual const char* getName(void)=0;
+};
 
-#ifndef DEBUG_PRINTLN
-#define DEBUG_PRINTLN Serial.println
-#endif  // DEBUG_PRINTLN
+#endif // __ISENSOR_H__
 
-class CTrackerParam;
-
-#endif // __BASE_H__

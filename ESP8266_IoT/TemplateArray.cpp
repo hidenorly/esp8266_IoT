@@ -16,7 +16,6 @@
 
 #include "base.h"
 #include "TemplateArray.h"
-#include <Ticker.h>
 
 template <typename T>
 TemplateArray<T>::TemplateArray(int nMaxArray)

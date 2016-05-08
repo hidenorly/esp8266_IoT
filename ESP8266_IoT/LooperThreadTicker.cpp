@@ -15,7 +15,6 @@
 */
 
 #include "base.h"
-#include <Ticker.h>
 #include "LooperThreadTicker.h"
 
 extern "C" {

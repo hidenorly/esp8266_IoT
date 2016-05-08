@@ -20,9 +20,10 @@
 #include "WebConfig.h"
 #include "NtpUtil.h"
 #include "LooperThreadTicker.h"
+#include "PressureSensor.h"
+#include "TemperatureSensor.h"
 
 #include <FS.h>
-
 #include <Time.h>
 #include <TimeLib.h>
 
@@ -49,7 +50,8 @@ void setOutputAndValue(int port, int initialVal) {
 void initializeGPIO() {
   // General config : BOOT MODE (GPIO0,2,15) related
   pinMode(0, INPUT);
-  pinMode(2, INPUT);
+  pinMode(2, INPUT_PULLUP);   // for I2C
+  pinMode(14, INPUT_PULLUP);  // for I2C
   pinMode(15, INPUT);
 
   // Project related config
@@ -60,7 +62,7 @@ void initializeGPIO() {
   setOutputAndValue(5, HIGH);
   setOutputAndValue(12, HIGH);
   setOutputAndValue(13, HIGH);
-  setOutputAndValue(14, HIGH);
+//  setOutputAndValue(14, HIGH);
   setOutputAndValue(16, HIGH);
 }
 
@@ -84,14 +86,28 @@ void onWiFiClientConnected(){
   start_NTP(); // socket related is need to be executed in main loop.
 }
 
+#define NUM_OF_SENSORS  2
+ISensor* pSensors[2];
+
 // --- debug
 void periodicTask(void* p){
-  char s[20];
+  char s[30];
   time_t n = now();
   sprintf(s, "%04d-%02d-%02d %02d:%02d:%02d", year(n), month(n), day(n), hour(n), minute(n), second(n));
 
   DEBUG_PRINT("UTC : ");
   DEBUG_PRINTLN(s);
+
+  if( pSensors ){
+    for(int i=0; i<NUM_OF_SENSORS; i++){
+      DEBUG_PRINT(pSensors[i]->getName());
+      DEBUG_PRINT(" :");
+      DEBUG_PRINT(pSensors[i]->getFloatValue());
+      DEBUG_PRINT(" [");
+      DEBUG_PRINT(pSensors[i]->getUnit());
+      DEBUG_PRINTLN("]");
+    }
+  }
 }
 
 // --- General setup() function
@@ -108,6 +124,13 @@ void setup() {
   // Check mode
   delay(1000);
   initializeProperMode();
+
+  // sensor debug
+  pSensors[0]= new PressureSensor();
+  pSensors[1]= new TemperatureSensor();
+  for(int i=0; i<NUM_OF_SENSORS; i++){
+    pSensors[i]->initialize();
+  }
 
   // register periodic tasks which need to be called from loop() when the timer are activated.
   g_LooperThreadManager.add( new LooperThreadTicker(reinterpret_cast<LooperThreadTicker::CALLBACK_FUNC>(periodicTask), NULL, 1000) );

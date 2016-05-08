@@ -14,20 +14,36 @@
  limitations under the License.
 */
 
-#ifndef __BASE_H__
-#define __BASE_H__
+#ifndef __I2C_H__
+#define __I2C_H__
 
-#include "Arduino.h"
+#include <Wire.h>
+#include <stdint.h>
 
-// --- debug macro
-#ifndef DEBUG_PRINT
-#define DEBUG_PRINT Serial.print
-#endif  // DEBUG_PRINT
+typedef uint8_t BYTE;
+typedef uint16_t WORD;
 
-#ifndef DEBUG_PRINTLN
-#define DEBUG_PRINTLN Serial.println
-#endif  // DEBUG_PRINTLN
+class I2C
+{
+  public:
+    I2C(int slaveAddress);
+    ~I2C();
 
-class CTrackerParam;
+    void init(void);
+    
+    void write(BYTE command, BYTE* data, int nSize);
+    void read(BYTE command, BYTE* data, int nSize);
 
-#endif // __BASE_H__
+    void writeByte(BYTE command, BYTE data);
+    BYTE readByte(BYTE command);
+    void writeWord(BYTE command, WORD data);
+    WORD readWord(BYTE command);
+
+  protected:
+    BYTE mSLA;
+
+    const int GPIO_SDA=2;
+    const int GPIO_SCL=14;
+};
+
+#endif // __I2C_H__
