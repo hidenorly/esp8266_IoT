@@ -129,6 +129,19 @@ void periodicTask(void* p){
 #endif // ENABLE_SENSOR
 }
 
+class Poller:public TimerContextTicker
+{
+  public:
+    Poller(int dutyMSec=0):TimerContextTicker(NULL, NULL, dutyMSec)
+    {
+    }
+    virtual void doCallback(void)
+    {
+      DEBUG_PRINTLN("Poller callback");
+    }
+};
+
+
 // --- General setup() function
 void setup() {
   // Initialize GPIO
@@ -161,6 +174,9 @@ void setup() {
 
   // register periodic tasks which need to be called from loop() when the timer are activated.
   g_LooperThreadManager.add( new LooperThreadTicker(reinterpret_cast<LooperThreadTicker::CALLBACK_FUNC>(periodicTask), NULL, 1000) );
+
+  static Poller* sPoll=new Poller(1000);
+  sPoll->registerToTimer();
 }
 
 

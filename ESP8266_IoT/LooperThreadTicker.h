@@ -25,31 +25,42 @@ extern "C" {
   typedef struct _ETSTIMER_ ETSTimer;
 }
 
-class LooperThreadTicker
+class TimerContextTicker
 {
   public:
     typedef void (*CALLBACK_FUNC)(void*);
+    TimerContextTicker(CALLBACK_FUNC pFunc=NULL, void* pArg=NULL, int dutyMSec=0);
+    virtual ~TimerContextTicker();
+
+  protected:
+    static void _timerCallback(void* pTimerContextTicker);
+
+  public:
+    void registerToTimer(void);
+    void unregisterFromTimer(void);
+
+    virtual void doCallback(void);
+
+  protected:
+    CALLBACK_FUNC mpFunc;
+    void* mpArg;
+    int mDutySec;
+    ETSTimer* mpETSTimer;
+};
+
+class LooperThreadTicker:public TimerContextTicker
+{
+  public:
     LooperThreadTicker(CALLBACK_FUNC pFunc=NULL, void* pArg=NULL, int dutyMSec=0);
     ~LooperThreadTicker();
     void setActive(int bActive);
     int getActive();
 
     // --- for LooperThreadManager
-    void doCallback(void);
-    void registerToTimer(void);
-    void unregisterFromTimer(void);
-
-protected:
-    static void _timerCallback(void* pLooperThreadTicker);
-
-  protected:
-    CALLBACK_FUNC mpFunc;
-    void* mpArg;
-    int mDutySec;
+    virtual void doCallback(void);
 
   protected:
     volatile int mFlagActivated;
-    ETSTimer* mpETSTimer;
 };
 
 extern template class TemplateArray<LooperThreadTicker>;

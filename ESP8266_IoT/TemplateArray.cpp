@@ -75,3 +75,7 @@ int TemplateArray<T>::size(void)
 // TODO: I'm not sure why but I cannot instanciate template class TemplateArray<LooperThreadTicker>; in LooperThreadTicker.cpp. But here is Ok...
 #include "LooperThreadTicker.h"
 template class TemplateArray<LooperThreadTicker>;
+
+#include "SensorManager.h"
+template class TemplateArray<ISensor>;
+
