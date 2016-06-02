@@ -96,7 +96,7 @@ void SensorManager::releaseInstance(void)
 void SensorManager::addSensor(ISensor* pSensor, SensorData* pData)
 {
   mpSensors.add(pSensor);
-  pData->registerToTimer();
+//  pData->registerToTimer();
 }
 
 

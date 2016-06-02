@@ -17,6 +17,8 @@
 #ifndef __NTPUTIL_H__
 #define __NTPUTIL_H__
 
+#include "LooperThreadTicker.h"
+
 void start_NTP();
 
 #endif // __NTPUTIL_H__

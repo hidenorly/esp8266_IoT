@@ -104,40 +104,36 @@ ISensor* g_pSensors[NUM_OF_SENSORS];
 int g_NUM_SENSORS=0;
 #endif // ENABLE_SENSOR
 
-// --- debug
-void periodicTask(void* p){
-  char s[30];
-  time_t n = now();
-  sprintf(s, "%04d-%02d-%02d %02d:%02d:%02d", year(n), month(n), day(n), hour(n), minute(n), second(n));
 
-  DEBUG_PRINT("UTC : ");
-  DEBUG_PRINTLN(s);
-
-#ifdef ENABLE_SENSOR
-  if( g_pSensors ){
-    for(int i=0; i<g_NUM_SENSORS; i++){
-      if( g_pSensors[i]!=NULL){
-        DEBUG_PRINT(g_pSensors[i]->getName());
-        DEBUG_PRINT(" :");
-        DEBUG_PRINT(g_pSensors[i]->getFloatValue());
-        DEBUG_PRINT(" [");
-        DEBUG_PRINT(g_pSensors[i]->getUnit());
-        DEBUG_PRINTLN("]");
-      }
-    }
-  }
-#endif // ENABLE_SENSOR
-}
-
-class Poller:public TimerContextTicker
+class Poller:public LooperThreadTicker
 {
   public:
-    Poller(int dutyMSec=0):TimerContextTicker(NULL, NULL, dutyMSec)
+    Poller(int dutyMSec=0):LooperThreadTicker(NULL, NULL, dutyMSec)
     {
     }
     virtual void doCallback(void)
     {
-      DEBUG_PRINTLN("Poller callback");
+      char s[30];
+      time_t n = now();
+      sprintf(s, "%04d-%02d-%02d %02d:%02d:%02d", year(n), month(n), day(n), hour(n), minute(n), second(n));
+    
+      DEBUG_PRINT("UTC : ");
+      DEBUG_PRINTLN(s);
+    
+    #ifdef ENABLE_SENSOR
+      if( g_pSensors ){
+        for(int i=0; i<g_NUM_SENSORS; i++){
+          if( g_pSensors[i]!=NULL){
+            DEBUG_PRINT(g_pSensors[i]->getName());
+            DEBUG_PRINT(" :");
+            DEBUG_PRINT(g_pSensors[i]->getFloatValue());
+            DEBUG_PRINT(" [");
+            DEBUG_PRINT(g_pSensors[i]->getUnit());
+            DEBUG_PRINTLN("]");
+          }
+        }
+      }
+    #endif // ENABLE_SENSOR
     }
 };
 
@@ -172,11 +168,8 @@ void setup() {
   }
 #endif // ENABLE_SENSOR
 
-  // register periodic tasks which need to be called from loop() when the timer are activated.
-  g_LooperThreadManager.add( new LooperThreadTicker(reinterpret_cast<LooperThreadTicker::CALLBACK_FUNC>(periodicTask), NULL, 1000) );
-
   static Poller* sPoll=new Poller(1000);
-  sPoll->registerToTimer();
+  g_LooperThreadManager.add(sPoll);
 }
 
 

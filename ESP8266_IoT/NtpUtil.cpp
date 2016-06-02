@@ -16,45 +16,52 @@
 
 #include "base.h"
 #include "NtpUtil.h"
-#include <Ticker.h>
 #include <NTP.h>
+#include "LooperThreadTicker.h"
 
 extern const char* NTP_SERVER;
 
-Ticker g_NtpStatusTracker;
-void checkNtpStatus(CTrackerParam*);
-void setupNtpStatusTracker(){
-  static int bInitialized = false;
-  if( !bInitialized ) {
-    g_NtpStatusTracker.attach_ms<CTrackerParam*>(500, checkNtpStatus, NULL);
-  }
+class NtpStatusTracker:public LooperThreadTicker
+{
+  public:
+    NtpStatusTracker(int dutyMSec=500);
+  protected:
+    virtual void doCallback(void);
+    int mbInitialized1;
+    int mbInitialized2;
+};
+
+NtpStatusTracker::NtpStatusTracker(int dutyMSec):LooperThreadTicker(NULL, NULL, dutyMSec),mbInitialized1(false),mbInitialized2(false)
+{
 }
 
-void checkNtpStatus(CTrackerParam* p){
+void NtpStatusTracker::doCallback(void)
+{
   time_t n = now();
   if( year(n) == 1970 ) {
     // NTP is not succeeded
-    static int bInitialized1 = false;
-    if( !bInitialized1 ){
+    if( !mbInitialized1 ){
       setSyncInterval(10);
-      bInitialized1 = true;
+      mbInitialized1 = true;
     }
   } else {
     // after successful to set NTPed time on system
-    static int bInitialized2 = false;
-    if( !bInitialized2 ){
+    if( !mbInitialized2 ){
       setSyncInterval(300);
-      bInitialized2 = true;
+      mbInitialized2 = true;
     }
   }
 }
+
+static NtpStatusTracker* g_pNtpStatusTracker = NULL;
 
 void start_NTP(){
   static int bInitialized=false;
   if(!bInitialized){
     setTimeServer(NTP_SERVER);
     ntp_begin(2390);
+    g_pNtpStatusTracker = new NtpStatusTracker();
+    g_LooperThreadManager.add(g_pNtpStatusTracker);
     bInitialized = true;
   }
-  setupNtpStatusTracker();
 }

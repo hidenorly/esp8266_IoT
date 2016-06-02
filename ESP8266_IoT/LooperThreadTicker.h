@@ -34,6 +34,7 @@ class TimerContextTicker
 
   protected:
     static void _timerCallback(void* pTimerContextTicker);
+    virtual void preCallback(void);
 
   public:
     void registerToTimer(void);
@@ -60,6 +61,7 @@ class LooperThreadTicker:public TimerContextTicker
     virtual void doCallback(void);
 
   protected:
+    virtual void preCallback(void);
     volatile int mFlagActivated;
 };
 
