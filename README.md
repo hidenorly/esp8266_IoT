@@ -10,6 +10,7 @@ This base code includes:
  - I2C driver support 
  - Sensor Framework
    - BMP180 (Pressure and Temperature sensor)
+   - DHT11 (Humidity and Temperature sensor)
 
 # Instruction
 
@@ -69,6 +70,9 @@ $ git archive HEAD --output=../NTP.zip
 
 Please note that GPIO0 : Low within 1sec after deasserting reset will bring you to set WiFi AP mode. You can configure the pin by ```MODE_PIN``` defined in ```ESP8266_IoT.ino```
 
+* GPIO2/14 : I2C (SDA:GPIO2, SCL:GPIO14)
+* GPIO4 : DHT11 Single Wire Data
+
 # Configuration
 
 ```
@@ -90,5 +94,6 @@ const char* HTML_HEAD = "<html><head><title>hidenorly's ESP8266</title></head><b
 #define ENABLE_I2C_BUS
 #define ENABLE_SENSOR
 #define ENABLE_SENSOR_PRESSURE 1
-#define ENABLE_TEMPERATURE_PRESSURE 1
+#define ENABLE_SENSOR_TEMPERATURE 1
+#define ENABLE_SENSOR_HUMIDITY 1
 ```
