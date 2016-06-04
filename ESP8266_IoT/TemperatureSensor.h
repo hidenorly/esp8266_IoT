@@ -18,7 +18,11 @@
 #define __TEMPERATURE_SENSOR_H__
 
 #include "SensorBase.h"
+
+#define TEMPERATURE_SENSOR_DRIVER BMP180
+//#define TEMPERATURE_SENSOR_DRIVER DHT11
 #include "BMP180.h"
+#include "DHT11.h"
 
 class TemperatureSensor:public ISensor
 {
@@ -33,7 +37,7 @@ class TemperatureSensor:public ISensor
     virtual const char* getName(void);
 
   protected:
-    BMP180* m_pSensorDriver;
+    TEMPERATURE_SENSOR_DRIVER* m_pSensorDriver;
 };
 
 #endif // __TEMPERATURE_SENSOR_H__

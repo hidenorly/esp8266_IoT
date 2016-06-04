@@ -28,7 +28,7 @@ TemperatureSensor::~TemperatureSensor()
 void TemperatureSensor::initialize(void)
 {
   if(NULL == m_pSensorDriver){
-    m_pSensorDriver = BMP180::getInstance();
+    m_pSensorDriver = TEMPERATURE_SENSOR_DRIVER::getInstance();
     m_pSensorDriver->initialize();
   }
 }
