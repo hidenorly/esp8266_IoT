@@ -65,7 +65,7 @@ void initializeGPIO() {
   pinMode(MODE_PIN, INPUT); // GPIO0 is for switching mode Low: WiFi AP Mode (Config) / High: WiFi Client (Normal)
 
   // If pin is NC, we should set {output / High} or {input / pull up enabled} on the pin.
-#if ENABLE_DHT11
+#if ENABLE_SENSOR_HUMIDITY
   pinMode(4, INPUT);   // for DHT11
 #else // ENABLE_DHT11
   setOutputAndValue(4, HIGH);
