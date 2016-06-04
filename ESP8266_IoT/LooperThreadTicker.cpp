@@ -152,9 +152,9 @@ void LooperThreadManager::handleLooperThread()
   for(int i=0, c=size(); i<c; i++){
     LooperThreadTicker* pTicker = getPtr(i);
     if( pTicker && pTicker->getActive() ){
-      char buf[50];
-      sprintf(buf, "LooperThreadTicker::preCallback: %x", pTicker);
-      DEBUG_PRINTLN(buf);
+//      char buf[50];
+//      sprintf(buf, "LooperThreadTicker::preCallback: %x", pTicker);
+//      DEBUG_PRINTLN(buf);
       pTicker->doCallback();
       pTicker->setActive(false);
     }

@@ -29,5 +29,11 @@
 #endif  // DEBUG_PRINTLN
 
 class CTrackerParam;
+void setOutputAndValue(int port, int initialVal);
+class AutoDisableInterrupt {
+  public:
+    AutoDisableInterrupt();
+    ~AutoDisableInterrupt();
+};
 
 #endif // __BASE_H__

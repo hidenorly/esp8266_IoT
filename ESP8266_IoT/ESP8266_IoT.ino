@@ -46,13 +46,9 @@ const char* HTML_HEAD = "<html><head><title>hidenorly's ESP8266</title></head><b
 #define ENABLE_SENSOR
 #define ENABLE_SENSOR_PRESSURE 1
 #define ENABLE_TEMPERATURE_PRESSURE 1
+#define ENABLE_DHT11  1
 
 // --- GPIO config
-void setOutputAndValue(int port, int initialVal) {
-  digitalWrite(port, initialVal); // Output data should be set first (before direction setting)
-  pinMode(port, OUTPUT);
-}
-
 void initializeGPIO() {
   // General config : BOOT MODE (GPIO0,2,15) related
   pinMode(0, INPUT);
@@ -68,7 +64,11 @@ void initializeGPIO() {
   pinMode(MODE_PIN, INPUT); // GPIO0 is for switching mode Low: WiFi AP Mode (Config) / High: WiFi Client (Normal)
 
   // If pin is NC, we should set {output / High} or {input / pull up enabled} on the pin.
+#if ENABLE_DHT11
+  pinMode(4, INPUT);   // for DHT11
+#else // ENABLE_DHT11
   setOutputAndValue(4, HIGH);
+#endif // ENABLE_DHT11
   setOutputAndValue(5, HIGH);
   setOutputAndValue(12, HIGH);
   setOutputAndValue(13, HIGH);
@@ -104,12 +104,16 @@ ISensor* g_pSensors[NUM_OF_SENSORS];
 int g_NUM_SENSORS=0;
 #endif // ENABLE_SENSOR
 
+#include "DHT11.h"
 
 class Poller:public LooperThreadTicker
 {
+  protected:
+    DHT11* mpDHT11;
   public:
     Poller(int dutyMSec=0):LooperThreadTicker(NULL, NULL, dutyMSec)
     {
+      mpDHT11 = DHT11::getInstance();
     }
     virtual void doCallback(void)
     {
@@ -134,6 +138,11 @@ class Poller:public LooperThreadTicker
         }
       }
     #endif // ENABLE_SENSOR
+      mpDHT11->doRead();
+      DEBUG_PRINT("DHT11 humidity :");
+      DEBUG_PRINTLN(mpDHT11->getHumidity());
+      DEBUG_PRINT("DHT11 temperature :");
+      DEBUG_PRINTLN(mpDHT11->getTemperature());
     }
 };
 

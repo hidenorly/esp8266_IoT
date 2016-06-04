@@ -18,3 +18,18 @@
 
 class CTrackerParam{
 };
+
+void setOutputAndValue(int port, int initialVal) {
+  digitalWrite(port, initialVal); // Output data should be set first (before direction setting)
+  pinMode(port, OUTPUT);
+}
+
+AutoDisableInterrupt::AutoDisableInterrupt()
+{
+  noInterrupts();
+}
+
+AutoDisableInterrupt::~AutoDisableInterrupt()
+{
+  interrupts();
+}
