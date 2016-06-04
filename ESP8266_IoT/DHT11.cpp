@@ -31,7 +31,7 @@ int DHT11::mRefCount = 0;
 DHT11::_DHT11_wait* DHT11::mWaitForStartConfition = NULL;
 
 
-#define DHT11_DATA  4
+#define DHT11_DATA  4 // GPIO4 is data line for DHT11
 
 DHT11::DHT11()
 {
@@ -168,9 +168,9 @@ void DHT11::_afterWaitStartCondition(DHT11* pThis)
   // parity check
   if( (parity & 0xFF) != ( ((humidity & 0xFF) + ((humidity & 0xFF00) >> 8)) + ((temp & 0xFF) + ((temp & 0xFF00) >> 8)) ) ){
     DEBUG_PRINTLN("step4 failure: parity error");
-    char buf[50];
-    sprintf(buf, "%x %x %x", parity, humidity, temp);
-    DEBUG_PRINTLN(buf);
+//    char buf[50];
+//    sprintf(buf, "%x %x %x", parity, humidity, temp);
+//    DEBUG_PRINTLN(buf);
     return;
   }
 
@@ -202,7 +202,7 @@ int DHT11::_readBit(void)
   }
 
   time = micros();
-  while( digitalRead(DHT11_DATA) == HIGH && (micros()<(time+DHT11_DATA_TIMEOUT3)) ); // wait to be HIGH by DHT11
+  while( digitalRead(DHT11_DATA) == HIGH && (micros()<(time+DHT11_DATA_TIMEOUT3)) ); // judge 0 or 1 by continuous HIGH period
   if( digitalRead(DHT11_DATA) == HIGH ){
     return 1;
   } else {
@@ -216,8 +216,8 @@ int DHT11::_readByte(void)
   for(int i=7; i>=0; i--){
     int val = _readBit();
     if( -1 == val ){
-      DEBUG_PRINT("DHT11::_readByte:error to read at ");
-      DEBUG_PRINTLN(i);
+//      DEBUG_PRINT("DHT11::_readByte:error to read at ");
+//      DEBUG_PRINTLN(i);
       return -1;
     }
     ret = ret | ((val & 1) << i);

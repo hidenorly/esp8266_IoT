@@ -22,6 +22,7 @@
 #include "LooperThreadTicker.h"
 #include "PressureSensor.h"
 #include "TemperatureSensor.h"
+#include "HumiditySensor.h"
 
 #include <FS.h>
 #include <Time.h>
@@ -45,8 +46,8 @@ const char* HTML_HEAD = "<html><head><title>hidenorly's ESP8266</title></head><b
 #define ENABLE_I2C_BUS
 #define ENABLE_SENSOR
 #define ENABLE_SENSOR_PRESSURE 1
-#define ENABLE_TEMPERATURE_PRESSURE 1
-#define ENABLE_DHT11  1
+#define ENABLE_SENSOR_TEMPERATURE 1
+#define ENABLE_SENSOR_HUMIDITY 1
 
 // --- GPIO config
 void initializeGPIO() {
@@ -99,12 +100,10 @@ void onWiFiClientConnected(){
 }
 
 #ifdef ENABLE_SENSOR
-#define NUM_OF_SENSORS  (ENABLE_SENSOR_PRESSURE+ENABLE_TEMPERATURE_PRESSURE)
+#define NUM_OF_SENSORS  (ENABLE_SENSOR_PRESSURE+ENABLE_SENSOR_TEMPERATURE+ENABLE_SENSOR_HUMIDITY)
 ISensor* g_pSensors[NUM_OF_SENSORS];
 int g_NUM_SENSORS=0;
 #endif // ENABLE_SENSOR
-
-#include "DHT11.h"
 
 class Poller:public LooperThreadTicker
 {
@@ -138,11 +137,6 @@ class Poller:public LooperThreadTicker
         }
       }
     #endif // ENABLE_SENSOR
-      mpDHT11->doRead();
-      DEBUG_PRINT("DHT11 humidity :");
-      DEBUG_PRINTLN(mpDHT11->getHumidity());
-      DEBUG_PRINT("DHT11 temperature :");
-      DEBUG_PRINTLN(mpDHT11->getTemperature());
     }
 };
 
@@ -168,9 +162,12 @@ void setup() {
 #ifdef ENABLE_SENSOR_PRESSURE
   g_pSensors[n++] = new PressureSensor();
 #endif // ENABLE_SENSOR_PRESSURE
-#ifdef ENABLE_TEMPERATURE_PRESSURE
+#ifdef ENABLE_SENSOR_TEMPERATURE
   g_pSensors[n++] = new TemperatureSensor();
-#endif // ENABLE_TEMPERATURE_PRESSURE
+#endif // ENABLE_SENSOR_TEMPERATURE
+#ifdef ENABLE_SENSOR_HUMIDITY
+  g_pSensors[n++] = new HumiditySensor();
+#endif // ENABLE_SENSOR_HUMIDITY
   g_NUM_SENSORS = n;
   for(int i=0; i<n; i++){
     g_pSensors[i]->initialize();
