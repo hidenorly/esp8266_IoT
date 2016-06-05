@@ -31,6 +31,7 @@ class TimerContextTicker
     typedef void (*CALLBACK_FUNC)(void*);
     TimerContextTicker(CALLBACK_FUNC pFunc=NULL, void* pArg=NULL, int dutyMSec=0);
     virtual ~TimerContextTicker();
+    int getDutyMSec(void);
 
   protected:
     static void _timerCallback(void* pTimerContextTicker);

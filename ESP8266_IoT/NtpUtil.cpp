@@ -15,11 +15,11 @@
 */
 
 #include "base.h"
+#include "config.h"
 #include "NtpUtil.h"
 #include <NTP.h>
 #include "LooperThreadTicker.h"
 
-extern const char* NTP_SERVER;
 
 class NtpStatusTracker:public LooperThreadTicker
 {

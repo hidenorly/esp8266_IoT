@@ -15,6 +15,7 @@
 */
 
 #include "base.h"
+#include "config.h"
 #include "WiFiUtil.h"
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
@@ -23,8 +24,6 @@
 // --- HTTP server related
 static ESP8266WebServer* g_pHttpd = NULL; // http server for WiFi AP Mode
 
-extern int HTTP_SERVER_PORT;
-extern const char* HTML_HEAD;
 char* HTML_TAIL = "</body></html>";
 
 void httpd_handleRootGet(void);

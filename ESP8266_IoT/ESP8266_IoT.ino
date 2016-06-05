@@ -15,6 +15,7 @@
 */
 
 #include "base.h"
+#include "config.h"
 #include <ESP8266WiFi.h>
 #include "WiFiUtil.h"
 #include "WebConfig.h"
@@ -27,57 +28,8 @@
 #include <FS.h>
 #include <Time.h>
 #include <TimeLib.h>
+#include "PWM.h"
 
-// --- config
-const int MODE_PIN = 0; // GPIO0 {Low: WiFi AP / High: WiFi Client}
-
-// --- config: WIFI
-const char* WIFI_CONFIG = "/wifi_config";
-const char* WIFIAP_PASSWORD = "1234567890"; // you can see WiFi Mac Address's SSID and this is password for setup SSID/Password from web.
-
-// --- config: NTP
-const char* NTP_SERVER = "jp.pool.ntp.org";
-
-// --- config: httpd
-int HTTP_SERVER_PORT = 80;
-const char* HTML_HEAD = "<html><head><title>hidenorly's ESP8266</title></head><body>";
-
-// --- config: sensor support
-#define ENABLE_I2C_BUS
-#define ENABLE_SENSOR
-#define ENABLE_SENSOR_PRESSURE 1
-#define ENABLE_SENSOR_TEMPERATURE 1
-#define ENABLE_SENSOR_HUMIDITY 1
-
-// --- GPIO config
-void initializeGPIO() {
-  // General config : BOOT MODE (GPIO0,2,15) related
-  pinMode(0, INPUT);
-#ifdef ENABLE_I2C_BUS
-  pinMode(2, INPUT_PULLUP);   // for I2C
-  pinMode(14, INPUT_PULLUP);  // for I2C
-#else // ENABLE_I2C_BUS
-  pinMode(2, INPUT);
-#endif // ENABLE_I2C_BUS
-  pinMode(15, INPUT);
-
-  // Project related config
-  pinMode(MODE_PIN, INPUT); // GPIO0 is for switching mode Low: WiFi AP Mode (Config) / High: WiFi Client (Normal)
-
-  // If pin is NC, we should set {output / High} or {input / pull up enabled} on the pin.
-#if ENABLE_SENSOR_HUMIDITY
-  pinMode(4, INPUT);   // for DHT11
-#else // ENABLE_DHT11
-  setOutputAndValue(4, HIGH);
-#endif // ENABLE_DHT11
-  setOutputAndValue(5, HIGH);
-  setOutputAndValue(12, HIGH);
-  setOutputAndValue(13, HIGH);
-#ifndef ENABLE_I2C_BUS
-  setOutputAndValue(14, HIGH);
-#endif // ENABLE_I2C_BUS
-  setOutputAndValue(16, HIGH);
-}
 
 // --- mode changer
 void initializeProperMode(){
@@ -104,6 +56,9 @@ void onWiFiClientConnected(){
 ISensor* g_pSensors[NUM_OF_SENSORS];
 int g_NUM_SENSORS=0;
 #endif // ENABLE_SENSOR
+
+static PWM* g_pPWM=NULL;
+
 
 class Poller:public LooperThreadTicker
 {
@@ -137,6 +92,9 @@ class Poller:public LooperThreadTicker
         }
       }
     #endif // ENABLE_SENSOR
+      static int i=0;
+      i++;
+      g_pPWM->setDuty(i % 101);
     }
 };
 
@@ -173,6 +131,8 @@ void setup() {
     g_pSensors[i]->initialize();
   }
 #endif // ENABLE_SENSOR
+
+  g_pPWM = new PWM(13, 20, 100.0f*0.5f/20.0f);
 
   static Poller* sPoll=new Poller(1000);
   g_LooperThreadManager.add(sPoll);

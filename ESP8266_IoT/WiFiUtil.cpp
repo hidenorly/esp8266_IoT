@@ -15,6 +15,7 @@
 */
 
 #include "base.h"
+#include "config.h"
 #include "WiFiUtil.h"
 
 #include <FS.h>
@@ -31,9 +32,6 @@
 #include <WiFiClientSecure.h>
 #include <WiFiServer.h>
 #include <WiFiUdp.h>
-
-extern const char* WIFI_CONFIG;
-extern const char* WIFIAP_PASSWORD;
 
 String getDefaultSSID(){
   byte mac[6];

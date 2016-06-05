@@ -79,3 +79,6 @@ template class TemplateArray<LooperThreadTicker>;
 #include "SensorManager.h"
 template class TemplateArray<ISensor>;
 
+#include "PWM.h"
+template class TemplateArray<PWM>;
+

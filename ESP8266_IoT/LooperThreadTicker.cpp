@@ -43,6 +43,11 @@ TimerContextTicker::~TimerContextTicker()
   mDutySec = 0;
 }
 
+int TimerContextTicker::getDutyMSec(void)
+{
+  return mDutySec;
+}
+
 void TimerContextTicker::registerToTimer(void)
 {
   if( NULL == mpETSTimer ) {
