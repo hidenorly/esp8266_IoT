@@ -16,6 +16,7 @@
 
 #include "base.h"
 #include "config.h"
+#include "ServoDrvSG90D.h"
 
 // --- config
 const int MODE_PIN = 0; // GPIO0 {Low: WiFi AP / High: WiFi Client}
@@ -56,6 +57,9 @@ void initializeGPIO(void) {
 #ifdef ENABLE_SERVO
   setOutputAndValue(12, LOW);
   setOutputAndValue(13, LOW);
+  ServoManager* pServoManager = ServoManager::getInstance();
+  DEBUG_PRINTLN( pServoManager->addServo( new ServoDriverSG90D(12) ) );
+  DEBUG_PRINTLN( pServoManager->addServo( new ServoDriverSG90D(13) ) );
 #else // ENABLE_SERVO
   setOutputAndValue(12, HIGH);
   setOutputAndValue(13, HIGH);

@@ -28,7 +28,8 @@
 #include <FS.h>
 #include <Time.h>
 #include <TimeLib.h>
-#include "PWM.h"
+#include "ServoManager.h"
+#include "ServoDrvSG90D.h"
 
 
 // --- mode changer
@@ -56,9 +57,6 @@ void onWiFiClientConnected(){
 ISensor* g_pSensors[NUM_OF_SENSORS];
 int g_NUM_SENSORS=0;
 #endif // ENABLE_SENSOR
-
-static PWM* g_pPWM=NULL;
-
 
 class Poller:public LooperThreadTicker
 {
@@ -92,9 +90,19 @@ class Poller:public LooperThreadTicker
         }
       }
     #endif // ENABLE_SENSOR
-      static int i=0;
-      i++;
-      g_pPWM->setDuty(i % 101);
+
+    #ifdef ENABLE_SERVO
+    ServoManager* pServoManager = ServoManager::getInstance();
+    static int d=0;
+    d++;
+    if( d & 0x01 ){
+      pServoManager->setAngle(0, 30.0f);
+      pServoManager->setAngle(1, 0.0f);
+    } else {
+      pServoManager->setAngle(0, 00.0f);
+      pServoManager->setAngle(1, -30.0f);
+    }
+    #endif // ENABLE_SERVO
     }
 };
 
@@ -131,8 +139,6 @@ void setup() {
     g_pSensors[i]->initialize();
   }
 #endif // ENABLE_SENSOR
-
-  g_pPWM = new PWM(13, 20, 100.0f*0.5f/20.0f);
 
   static Poller* sPoll=new Poller(1000);
   g_LooperThreadManager.add(sPoll);

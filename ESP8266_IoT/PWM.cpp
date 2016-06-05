@@ -35,6 +35,15 @@ PWM::~PWM()
 void PWM::setDuty(float dutyPercent)
 {
   updateDutyMicroSec(dutyPercent);
+#if 0
+  DEBUG_PRINT("PWM::setDuty(");
+  DEBUG_PRINT(dutyPercent);
+  DEBUG_PRINT(") on ");
+  DEBUG_PRINT(mGPO);
+  DEBUG_PRINT(mDutyMicroSec/1000.0f);
+  DEBUG_PRINT(" / ");
+  DEBUG_PRINTLN(mCycleMSec);
+#endif
 }
 
 void PWM::setDuty(int dutyPecent)
@@ -167,8 +176,8 @@ void PWMManager::tick(void)
 {
   if( mpPoller == NULL ) return;
   
-  int cycle = mpPoller->getDutyMSec();
   unsigned long start_time = micros();
+  int cycle = mpPoller->getDutyMSec();
 
   // set HIGH first
   int nextDutyMicroSec = INT_MAX;

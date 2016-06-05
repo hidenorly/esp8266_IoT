@@ -73,7 +73,14 @@ Please note that GPIO0 : Low within 1sec after deasserting reset will bring you 
 * GPIO2/14 : I2C (SDA:GPIO2, SCL:GPIO14)
 * GPIO4 : DHT11 Single Wire Data
 
+* GPIO12, GPIO13: Example is used for Servo Ch0/1.
+
+See ```void initializeGPIO(void)``` in ```config.cpp```
+
+
 # Configuration
+
+See ```config.h``` and ```config.cpp```
 
 ```
 // --- config

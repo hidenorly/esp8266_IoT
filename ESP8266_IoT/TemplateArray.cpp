@@ -20,6 +20,7 @@
 template <typename T>
 TemplateArray<T>::TemplateArray(int nMaxArray)
 {
+  AutoDisableInterrupt lock();
   mMaxArray=nMaxArray;
   mpContents = new T*[mMaxArray];
   for(int i=0; i<mMaxArray; i++){
@@ -30,8 +31,10 @@ TemplateArray<T>::TemplateArray(int nMaxArray)
 template <typename T>
 TemplateArray<T>::~TemplateArray()
 {
+  AutoDisableInterrupt lock();
   for(int i=0; i<mMaxArray; i++){
     delete mpContents[i];
+    mpContents[i]=NULL;
   }
   delete mpContents;
   mpContents = NULL;
@@ -40,9 +43,11 @@ TemplateArray<T>::~TemplateArray()
 template <typename T>
 void TemplateArray<T>::add(T* pContent)
 {
+  AutoDisableInterrupt lock();
   for(int i=0; i<mMaxArray; i++){
     if( NULL == mpContents[i] ){
       mpContents[i] = pContent;
+      return;
     }
   }
 }
@@ -50,6 +55,7 @@ void TemplateArray<T>::add(T* pContent)
 template <typename T>
 void TemplateArray<T>::remove(T* pContent)
 {
+  AutoDisableInterrupt lock();
   for(int i=0; i<mMaxArray; i++){
     if( pContent == mpContents[i] ){
       delete pContent;
@@ -61,9 +67,9 @@ void TemplateArray<T>::remove(T* pContent)
 template <typename T>
 T* TemplateArray<T>::getPtr(int i)
 {
-  if( i<mMaxArray && i>=0 ){
-    return mpContents[i];
-  }
+  AutoDisableInterrupt lock();
+  if( (i<0) || (i>mMaxArray) ) return NULL;
+  return mpContents[i];
 }
      
 template <typename T>
@@ -81,4 +87,7 @@ template class TemplateArray<ISensor>;
 
 #include "PWM.h"
 template class TemplateArray<PWM>;
+
+#include "ServoManager.h"
+template class TemplateArray<IServo>;
 
