@@ -26,6 +26,7 @@ class ServoDriverSG90D:public IServo
     ServoDriverSG90D(int nGPO=13, float initialAngle=0.0f);
     virtual ~ServoDriverSG90D();
     virtual void setAngle(float angle);
+    virtual void enable(bool bEnable);
 
   protected:
     PWM* mPWM;

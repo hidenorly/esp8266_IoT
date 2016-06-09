@@ -32,6 +32,13 @@ const char* NTP_SERVER = "jp.pool.ntp.org";
 int HTTP_SERVER_PORT = 80;
 const char* HTML_HEAD = "<html><head><title>hidenorly's ESP8266</title></head><body>";
 
+// --- config: MQTT
+const char* MQTT_SERVER = "yraspi.local";
+const int MQTT_SERVER_PORT = 1883;
+const char* MQTT_CLIENTID = __TIME__ "_hidenoly_client_id";
+const char* MQTT_USERNAME = "username";
+const char* MQTT_PASSWORD = "password";
+
 // --- GPIO config
 void initializeGPIO(void) {
   // General config : BOOT MODE (GPIO0,2,15) related

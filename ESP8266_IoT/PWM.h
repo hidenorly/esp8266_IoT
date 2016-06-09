@@ -23,7 +23,7 @@
 class PWM
 {
   public:
-    PWM(int nGPO, int nCycleMSec, float dutyPercent=0.0f);
+    PWM(int nGPO, int nCycleMSec, float dutyPercent=0.0f, bool bEnable=false);
     ~PWM();
     void setDuty(float dutyPercent);
     void setDuty(int dutyPecent);
@@ -31,12 +31,15 @@ class PWM
     float getDuty(void);
     int getPort(void);
     int getDutyMicroSec(void);
+    void setEnableOutput(bool enable);
+    bool getEnableOutput(void);
     
   protected:
     void updateDutyMicroSec(float dutyPercent);
     int mGPO;
     int mCycleMSec;
     int mDutyMicroSec;
+    bool mEnable;
 };
 
 class PWMManager
@@ -46,6 +49,7 @@ class PWMManager
     void addPWM(PWM* pPWM);
     void removePWM(PWM* pPWM);
     void terminate(void);
+    void setPWMCycle(void);
 
   protected:
     PWMManager();
@@ -65,7 +69,6 @@ class PWMManager
     Poller* mpPoller;
 
   int getOptimalCycle(void);
-  void setPWMCycle(void);
 public:
   void tick(void);
 };

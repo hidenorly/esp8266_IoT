@@ -29,7 +29,9 @@
 #include <Time.h>
 #include <TimeLib.h>
 #include "ServoManager.h"
-#include "ServoDrvSG90D.h"
+
+#include <Adafruit_MQTT.h>
+#include <Adafruit_MQTT_Client.h>
 
 
 // --- mode changer
@@ -60,12 +62,9 @@ int g_NUM_SENSORS=0;
 
 class Poller:public LooperThreadTicker
 {
-  protected:
-    DHT11* mpDHT11;
   public:
     Poller(int dutyMSec=0):LooperThreadTicker(NULL, NULL, dutyMSec)
     {
-      mpDHT11 = DHT11::getInstance();
     }
     virtual void doCallback(void)
     {
@@ -92,16 +91,20 @@ class Poller:public LooperThreadTicker
     #endif // ENABLE_SENSOR
 
     #ifdef ENABLE_SERVO
+#if 0 // SERVO TEST
     ServoManager* pServoManager = ServoManager::getInstance();
     static int d=0;
     d++;
     if( d & 0x01 ){
       pServoManager->setAngle(0, 30.0f);
-      pServoManager->setAngle(1, 0.0f);
+      pServoManager->setAngle(1, -15.0f);
     } else {
-      pServoManager->setAngle(0, 00.0f);
+      pServoManager->setAngle(0, 15.0f);
       pServoManager->setAngle(1, -30.0f);
     }
+    pServoManager->enableServo(0, true);
+    pServoManager->enableServo(1, true);
+#endif
     #endif // ENABLE_SERVO
     }
 };

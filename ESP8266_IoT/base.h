@@ -20,13 +20,15 @@
 #include "Arduino.h"
 
 // --- debug macro
-#ifndef DEBUG_PRINT
-#define DEBUG_PRINT Serial.print
-#endif  // DEBUG_PRINT
+#define ENABLE_DEBUG 1
 
-#ifndef DEBUG_PRINTLN
-#define DEBUG_PRINTLN Serial.println
-#endif  // DEBUG_PRINTLN
+#if ENABLE_DEBUG
+  #define DEBUG_PRINT(...) Serial.print(__VA_ARGS__)
+  #define DEBUG_PRINTLN(...) Serial.println(__VA_ARGS__)
+#else // ENABLE_DEBUG
+  #define DEBUG_PRINT(...)
+  #define DEBUG_PRINTLN(...)
+#endif // ENABLE_DEBUG
 
 class CTrackerParam;
 void setOutputAndValue(int port, int initialVal);

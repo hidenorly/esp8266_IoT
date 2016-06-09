@@ -91,3 +91,11 @@ void ServoManager::setAngle(int nServo, float angle)
   }
 }
 
+void ServoManager::enableServo(int nServo, bool bEnable)
+{
+  IServo* pServo = mpServos.getPtr(nServo);
+  if( pServo ){
+    pServo->enable(bEnable);
+  }
+}
+

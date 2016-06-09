@@ -41,5 +41,11 @@ void ServoDriverSG90D::setAngle(float angle)
 #endif
 
   mPWM->setDuty( 100.0f * ((1.45f + (2.4f-1.45f)*angle/90.0f)/mPWM->getCycleMSec()) );
+//  mPWM->setDuty( 100.0f * ((1.5f + (2.0f-1.5f)*angle/90.0f)/mPWM->getCycleMSec()) );
+}
+
+void ServoDriverSG90D::enable(bool bEnable)
+{
+  mPWM->setEnableOutput(bEnable);
 }
 

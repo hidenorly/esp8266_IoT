@@ -31,6 +31,13 @@ extern const char* NTP_SERVER;
 extern int HTTP_SERVER_PORT;
 extern const char* HTML_HEAD;
 
+// --- config: MQTT
+extern const char* MQTT_SERVER;
+extern const int MQTT_SERVER_PORT;
+extern const char* MQTT_CLIENTID;
+extern const char* MQTT_USERNAME;
+extern const char* MQTT_PASSWORD;
+
 // --- config: sensor support
 #define ENABLE_I2C_BUS
 #define ENABLE_SENSOR

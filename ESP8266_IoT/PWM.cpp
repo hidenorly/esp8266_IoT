@@ -18,7 +18,7 @@
 #include "PWM.h"
 #include "limits.h"
 
-PWM::PWM(int nGPO, int nCycleMSec, float dutyPercent):mGPO(nGPO),mCycleMSec(nCycleMSec)
+PWM::PWM(int nGPO, int nCycleMSec, float dutyPercent, bool bEnable):mGPO(nGPO),mCycleMSec(nCycleMSec),mEnable(bEnable)
 {
   setOutputAndValue(nGPO, LOW);
   updateDutyMicroSec(dutyPercent);
@@ -76,6 +76,21 @@ void PWM::updateDutyMicroSec(float dutyPercent)
   mDutyMicroSec = (mCycleMSec * dutyPercent * 10);
 }
 
+void PWM::setEnableOutput(bool enable)
+{
+  if( mEnable != enable){
+    mEnable=enable;
+    PWMManager* pManager = PWMManager::getInstance();
+    pManager->setPWMCycle();
+  }
+}
+
+bool PWM::getEnableOutput(void)
+{
+  return mEnable;
+}
+
+
 
 // --- PWM Data Manager
 PWMManager* PWMManager::mpThis = NULL;
@@ -131,7 +146,7 @@ int PWMManager::getOptimalCycle(void)
   // TODO: improvement is required, such as GCD method etc.
   for(int i=0, c=mpPWMs.size(); i<c; i++){
     PWM* pPWM = mpPWMs.getPtr(i);
-    if( NULL != pPWM ){
+    if( NULL != pPWM && pPWM->getEnableOutput() ){
       int nCycle = pPWM->getCycleMSec();
       if( nCycle < ret ){
         ret = nCycle;
@@ -145,18 +160,27 @@ int PWMManager::getOptimalCycle(void)
 void PWMManager::setPWMCycle(void)
 {
   int cycle = getOptimalCycle();
-  bool bCreate = false;
-  if( NULL == mpPoller ){
-    mpPoller = new Poller(cycle, this);
-    bCreate = true;
-  } else if( mpPoller->getDutyMSec() != cycle ){
-    mpPoller->unregisterFromTimer();
-    delete mpPoller;
-    mpPoller = new Poller(cycle, this);
-    bCreate = true;
-  }
-  if(bCreate){
-    mpPoller->registerToTimer();
+  if( INT_MAX == cycle ){
+    // No enabled PWM
+    if( NULL != mpPoller ){
+      mpPoller->unregisterFromTimer();
+      delete mpPoller;
+      mpPoller = NULL;
+    }
+  } else {
+    bool bCreate = false;
+    if( NULL == mpPoller ){
+      mpPoller = new Poller(cycle, this);
+      bCreate = true;
+    } else if( mpPoller->getDutyMSec() != cycle ){
+      mpPoller->unregisterFromTimer();
+      delete mpPoller;
+      mpPoller = new Poller(cycle, this);
+      bCreate = true;
+    }
+    if(bCreate){
+      mpPoller->registerToTimer();
+    }
   }
 }
 
@@ -183,7 +207,7 @@ void PWMManager::tick(void)
   int nextDutyMicroSec = INT_MAX;
   for(int i=0, c=mpPWMs.size(); i<c; i++){
     PWM* pPWM = mpPWMs.getPtr(i);
-    if( NULL != pPWM ){
+    if( NULL != pPWM && pPWM->getEnableOutput() ){
       digitalWrite(pPWM->getPort(), HIGH);
       int candidate = pPWM->getDutyMicroSec();
       if( candidate < nextDutyMicroSec ){
@@ -203,7 +227,7 @@ void PWMManager::tick(void)
       unsigned long nowDelta = micros() - start_time;
       for(int i=0; i<nPWM; i++){
         PWM* pPWM = mpPWMs.getPtr(i);
-        if( NULL != pPWM ){
+        if( NULL != pPWM && pPWM->getEnableOutput() ){
           if( pPWM->getDutyMicroSec() < nowDelta ){
             digitalWrite(pPWM->getPort(), LOW);
 /*          
