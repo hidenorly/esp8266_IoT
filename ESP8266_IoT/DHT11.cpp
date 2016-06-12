@@ -17,6 +17,8 @@
 #include "base.h"
 #include "DHT11.h"
 
+//#define DEBUG_DHT11
+
 // static members declaration with initial value
 uint16_t DHT11::mTemp = 0;
 uint16_t DHT11::mHumidity = 0;
@@ -123,8 +125,10 @@ void DHT11::_afterWaitStartCondition(DHT11* pThis)
   while( digitalRead(DHT11_DATA) != HIGH && (micros()<(time+DHT11_RESPONSE_TIMEOUT)) ); // wait to be HIGH by DHT11
   if( digitalRead(DHT11_DATA) != HIGH ){
     // failure to response
-//    DEBUG_PRINTLN("step2 failure: waiting HIGH(pull up)");
-    return;
+#ifdef DEBUG_DHT11
+    DEBUG_PRINTLN("step2 failure: waiting HIGH(pull up)");
+#endif // DEBUG_DHT11
+  return;
   }
   // step 2 done
 
@@ -133,14 +137,18 @@ void DHT11::_afterWaitStartCondition(DHT11* pThis)
   while( digitalRead(DHT11_DATA) != LOW && (micros()<(time+DHT11_RESPONSE_TIMEOUT))); // wait to be LOW by DHT11
   if( digitalRead(DHT11_DATA) != LOW ){
     // failure to response
-//    DEBUG_PRINTLN("step3 failure: waiting LOW");
+#ifdef DEBUG_DHT11
+    DEBUG_PRINTLN("step3 failure: waiting LOW");
+#endif // DEBUG_DHT11
     return;
   }
   time = micros();
   while( digitalRead(DHT11_DATA) != HIGH && (micros()<(time+DHT11_RESPONSE_TIMEOUT)) ); // wait to be HIGH by DHT11
   if( digitalRead(DHT11_DATA) != HIGH ){
     // failure to response
-//    DEBUG_PRINTLN("step3 failure: waiting HIGH");
+#ifdef DEBUG_DHT11
+    DEBUG_PRINTLN("step3 failure: waiting HIGH");
+#endif // DEBUG_DHT11
     return;
   }
   // step 3 done
@@ -149,19 +157,25 @@ void DHT11::_afterWaitStartCondition(DHT11* pThis)
   // read humidity 16bit
   int humidity = _readWord();
   if( -1 == humidity ){
-//    DEBUG_PRINTLN("step4 failure: reading humidity");
+#ifdef DEBUG_DHT11
+    DEBUG_PRINTLN("step4 failure: reading humidity");
+#endif // DEBUG_DHT11
     return;
   }
   // read temperature 16bit
   int temp = _readWord();
   if( -1 == temp ){
-//    DEBUG_PRINTLN("step4 failure: reading temp");
+#ifdef DEBUG_DHT11
+    DEBUG_PRINTLN("step4 failure: reading temp");
+#endif // DEBUG_DHT11
     return;
   }
   // read parity 8bit
   int parity = _readByte();
   if( -1 == parity ){
-//    DEBUG_PRINTLN("step4 failure: reading parity");
+#ifdef DEBUG_DHT11
+    DEBUG_PRINTLN("step4 failure: reading parity");
+#endif // DEBUG_DHT11
     return;
   }
 

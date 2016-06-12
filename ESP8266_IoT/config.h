@@ -31,23 +31,64 @@ extern const char* NTP_SERVER;
 extern int HTTP_SERVER_PORT;
 extern const char* HTML_HEAD;
 
-// --- config: MQTT
-extern const char* MQTT_SERVER;
-extern const int MQTT_SERVER_PORT;
-extern const char* MQTT_CLIENTID;
-extern const char* MQTT_USERNAME;
-extern const char* MQTT_PASSWORD;
+#define BB  1
+#define BOX1  2
+#define TARGET_PRODUCT BOX1
 
-// --- config: sensor support
-#define ENABLE_I2C_BUS
-#define ENABLE_SENSOR
-#define ENABLE_SENSOR_PRESSURE 1
-#define ENABLE_SENSOR_TEMPERATURE 1
-#define ENABLE_SENSOR_HUMIDITY 1
+#if TARGET_PRODUCT == BOX1
+  // --- config: MQTT
+  #define ENABLE_MQTT 0
+  #if ENABLE_MQTT
+  extern const char* MQTT_SERVER;
+  extern const int MQTT_SERVER_PORT;
+  //extern const char* MQTT_CLIENTID;
+  #define MQTT_CLIENTID "/hidenorly/"
+  extern const char* MQTT_USERNAME;
+  extern const char* MQTT_PASSWORD;
+  #endif // ENABLE_MQTT
+  
+  // --- config: sensor support
+  //#define ENABLE_I2C_BUS
+  #define ENABLE_SENSOR
+  #define ENABLE_SENSOR_PRESSURE 0
+  #define ENABLE_SENSOR_TEMPERATURE 1
+  #define ENABLE_SENSOR_HUMIDITY 1
+  #define TEMPERATURE_SENSOR_DRIVER DHT11
+  
+  // --- config: servo support
+  #define ENABLE_SERVO
+  
+  // --- config: fan sw
+  #define ENABLE_SWITCH_FAN 1
 
-// --- config: servo support
-#define ENABLE_SERVO
+#else // TARGET_PRODUCT
 
+  // --- config: MQTT
+  #define ENABLE_MQTT 1
+  #if ENABLE_MQTT
+  extern const char* MQTT_SERVER;
+  extern const int MQTT_SERVER_PORT;
+  //extern const char* MQTT_CLIENTID;
+  #define MQTT_CLIENTID "/hidenorly/"
+  extern const char* MQTT_USERNAME;
+  extern const char* MQTT_PASSWORD;
+  #endif // ENABLE_MQTT
+  
+  // --- config: sensor support
+  #define ENABLE_I2C_BUS
+  #define ENABLE_SENSOR
+  #define ENABLE_SENSOR_PRESSURE 1
+  #define ENABLE_SENSOR_TEMPERATURE 1
+  #define ENABLE_SENSOR_HUMIDITY 1
+  #define TEMPERATURE_SENSOR_DRIVER BMP180
+  //#define TEMPERATURE_SENSOR_DRIVER DHT11
+  
+  // --- config: servo support
+  #define ENABLE_SERVO
+  
+  // --- config: fan sw
+  #define ENABLE_SWITCH_FAN 1
+#endif // TARGET_PRODUCT
 
 // --- GPIO initial setup
 void initializeGPIO(void);

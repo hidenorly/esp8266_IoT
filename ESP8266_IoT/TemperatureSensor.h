@@ -17,10 +17,9 @@
 #ifndef __TEMPERATURE_SENSOR_H__
 #define __TEMPERATURE_SENSOR_H__
 
-#include "SensorBase.h"
 
-#define TEMPERATURE_SENSOR_DRIVER BMP180
-//#define TEMPERATURE_SENSOR_DRIVER DHT11
+#include "SensorBase.h"
+#include "config.h"
 #include "BMP180.h"
 #include "DHT11.h"
 

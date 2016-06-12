@@ -33,17 +33,50 @@
 #include <Adafruit_MQTT.h>
 #include <Adafruit_MQTT_Client.h>
 
+#define DEBUG_PRINT(...) Serial.print(__VA_ARGS__)
+#define DEBUG_PRINTLN(...) Serial.println(__VA_ARGS__)
+
+#ifdef ENABLE_SENSOR
+#define NUM_OF_SENSORS  (ENABLE_SENSOR_PRESSURE+ENABLE_SENSOR_TEMPERATURE+ENABLE_SENSOR_HUMIDITY)
+ISensor* g_pSensors[NUM_OF_SENSORS];
+int g_NUM_SENSORS=0;
+#endif // ENABLE_SENSOR
+
+#if ENABLE_MQTT
+  #if ENABLE_SSL_MQTT
+    WiFiClientSecure g_MQTTClient;
+  #else // ENABLE_SSL_MQTT
+    WiFiClient g_MQTTClient;
+  #endif // ENABLE_SSL_MQTT
+  Adafruit_MQTT_Client g_mqtt(&g_MQTTClient, MQTT_SERVER, MQTT_SERVER_PORT, MQTT_USERNAME, MQTT_PASSWORD);
+
+  #if ENABLE_SENSOR_PRESSURE
+  Adafruit_MQTT_Publish g_pressureSensor = Adafruit_MQTT_Publish(&g_mqtt, MQTT_CLIENTID"sensor/pressure");
+  #endif // ENABLE_SENSOR_PRESSURE
+  #if ENABLE_SENSOR_TEMPERATURE
+  Adafruit_MQTT_Publish g_temperatureSensor = Adafruit_MQTT_Publish(&g_mqtt, MQTT_CLIENTID"sensor/temperature");
+  #endif // ENABLE_SENSOR_TEMPERATURE
+  #if ENABLE_SENSOR_HUMIDITY
+  Adafruit_MQTT_Publish g_humiditySensor = Adafruit_MQTT_Publish(&g_mqtt, MQTT_CLIENTID"sensor/humidity");
+  #endif // ENABLE_SENSOR_HUMIDITY
+  #if ENABLE_SWITCH_FAN
+  Adafruit_MQTT_Subscribe g_fanSwitch = Adafruit_MQTT_Subscribe(&g_mqtt, MQTT_CLIENTID"switch/fan");
+  #endif // ENABLE_SWITCH_FAN
+#endif // ENABLE_MQTT
+
 
 // --- mode changer
-void initializeProperMode(){
+bool initializeProperMode(){
   if( (digitalRead(MODE_PIN) == 0) || (!SPIFFS.exists(WIFI_CONFIG)) ){
     // setup because WiFi AP mode is specified or WIFI_CONFIG is not found.
     setupWiFiAP();
     setup_httpd();
+    return false;
   } else {
     setupWiFiClient();
     setup_httpd();  // comment this out if you don't need to have httpd on WiFi client mode
   }
+  return true;
 }
 
 // --- handler for WiFi client enabled
@@ -52,13 +85,13 @@ void onWiFiClientConnected(){
   DEBUG_PRINT("IP address: ");
   DEBUG_PRINTLN(WiFi.localIP());
   start_NTP(); // socket related is need to be executed in main loop.
+  #if ENABLE_MQTT
+  #if ENABLE_SWITCH_FAN
+  g_mqtt.subscribe(&g_fanSwitch);
+  #endif // ENABLE_SWITCH_FAN
+  g_mqtt.connect();
+  #endif // ENABLE_MQTT
 }
-
-#ifdef ENABLE_SENSOR
-#define NUM_OF_SENSORS  (ENABLE_SENSOR_PRESSURE+ENABLE_SENSOR_TEMPERATURE+ENABLE_SENSOR_HUMIDITY)
-ISensor* g_pSensors[NUM_OF_SENSORS];
-int g_NUM_SENSORS=0;
-#endif // ENABLE_SENSOR
 
 class Poller:public LooperThreadTicker
 {
@@ -85,6 +118,20 @@ class Poller:public LooperThreadTicker
             DEBUG_PRINT(" [");
             DEBUG_PRINT(g_pSensors[i]->getUnit());
             DEBUG_PRINTLN("]");
+
+            #if ENABLE_MQTT
+            switch(i){
+              case ENABLE_SENSOR_PRESSURE:
+                g_pressureSensor.publish(g_pSensors[i]->getFloatValue());
+                break;
+              case 1:
+                g_temperatureSensor.publish(g_pSensors[i]->getFloatValue());
+                break;
+              case 2:
+                g_humiditySensor.publish(g_pSensors[i]->getFloatValue());
+                break;
+            }
+            #endif // ENABLE_MQTT
           }
         }
       }
@@ -123,28 +170,32 @@ void setup() {
 
   // Check mode
   delay(1000);
-  initializeProperMode();
-
-#ifdef ENABLE_SENSOR
-  // Initialize sensor
-  int n=0;
-#ifdef ENABLE_SENSOR_PRESSURE
-  g_pSensors[n++] = new PressureSensor();
-#endif // ENABLE_SENSOR_PRESSURE
-#ifdef ENABLE_SENSOR_TEMPERATURE
-  g_pSensors[n++] = new TemperatureSensor();
-#endif // ENABLE_SENSOR_TEMPERATURE
-#ifdef ENABLE_SENSOR_HUMIDITY
-  g_pSensors[n++] = new HumiditySensor();
-#endif // ENABLE_SENSOR_HUMIDITY
-  g_NUM_SENSORS = n;
-  for(int i=0; i<n; i++){
-    g_pSensors[i]->initialize();
+  if(initializeProperMode()){
+  #ifdef ENABLE_SENSOR
+    // Initialize sensor
+    int n=0;
+  #if ENABLE_SENSOR_PRESSURE
+    g_pSensors[n++] = new PressureSensor();
+  #endif // ENABLE_SENSOR_PRESSURE
+  #if ENABLE_SENSOR_TEMPERATURE
+    g_pSensors[n++] = new TemperatureSensor();
+  #endif // ENABLE_SENSOR_TEMPERATURE
+  #if ENABLE_SENSOR_HUMIDITY
+    g_pSensors[n++] = new HumiditySensor();
+  #endif // ENABLE_SENSOR_HUMIDITY
+    g_NUM_SENSORS = n;
+    for(int i=0; i<n; i++){
+      DEBUG_PRINT("Init:");
+      DEBUG_PRINTLN(g_pSensors[i]->getName());
+      g_pSensors[i]->initialize();
+    }
+    DEBUG_PRINT(n);
+    DEBUG_PRINTLN(" sensors are initialized.");
+  #endif // ENABLE_SENSOR
+  
+    static Poller* sPoll=new Poller(1000);
+    g_LooperThreadManager.add(sPoll);
   }
-#endif // ENABLE_SENSOR
-
-  static Poller* sPoll=new Poller(1000);
-  g_LooperThreadManager.add(sPoll);
 }
 
 
@@ -153,4 +204,16 @@ void loop() {
   handleWiFiClientStatus();
   handleWebServer();
   g_LooperThreadManager.handleLooperThread();
+
+  #if ENABLE_MQTT
+  Adafruit_MQTT_Subscribe *subscription;
+  while ((subscription = g_mqtt.readSubscription(5))) {
+  #if ENABLE_SWITCH_FAN
+    if (subscription == &g_fanSwitch) {
+      Serial.print("Got: ");
+      Serial.println((char *)g_fanSwitch.lastread);
+    }
+  #endif // ENABLE_SWITCH_FAN
+  }
+  #endif // ENABLE_MQTT
 }

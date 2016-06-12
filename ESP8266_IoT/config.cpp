@@ -33,11 +33,13 @@ int HTTP_SERVER_PORT = 80;
 const char* HTML_HEAD = "<html><head><title>hidenorly's ESP8266</title></head><body>";
 
 // --- config: MQTT
-const char* MQTT_SERVER = "yraspi.local";
+#if ENABLE_MQTT
+const char* MQTT_SERVER = "192.168.10.31";
 const int MQTT_SERVER_PORT = 1883;
-const char* MQTT_CLIENTID = __TIME__ "_hidenoly_client_id";
+//const char* MQTT_CLIENTID = "_hidenoly_client_id";
 const char* MQTT_USERNAME = "username";
 const char* MQTT_PASSWORD = "password";
+#endif // ENABLE_MQTT
 
 // --- GPIO config
 void initializeGPIO(void) {
