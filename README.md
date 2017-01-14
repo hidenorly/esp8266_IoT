@@ -68,8 +68,6 @@ $ git archive HEAD --output=../NTP.zip
 * GPIO2: High
 * GPIO15: Low
 
-Please note that GPIO0 : Low within 1sec after deasserting reset will bring you to set WiFi AP mode. You can configure the pin by ```MODE_PIN``` defined in ```ESP8266_IoT.ino```
-
 * GPIO2/14 : I2C (SDA:GPIO2, SCL:GPIO14)
 * GPIO4 : DHT11 Single Wire Data
 
@@ -104,3 +102,11 @@ const char* HTML_HEAD = "<html><head><title>hidenorly's ESP8266</title></head><b
 #define ENABLE_SENSOR_TEMPERATURE 1
 #define ENABLE_SENSOR_HUMIDITY 1
 ```
+
+# How to setup
+
+GPIO0 : Low within 1sec after deasserting reset will bring you to set WiFi AP mode.
+Please no that uou can configure the pin by ```MODE_PIN``` defined in ```ESP8266_IoT.ino```
+
+And you can configure the device's SSID/Password through your broswer which URL is ```http://192.168.4.1``` from your connected PC to this device. Please note that your PC needs to connect to the device via WiFi which SSID is mac address of your device and the password is ```1234567890``` that you can configure it by ```config.cpp```
+

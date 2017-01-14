@@ -53,6 +53,7 @@ void setupWiFiAP(){
 }
 
 void saveWiFiConfig(String ssid, String pass){
+  if( ssid!="" && pass!="" ) {
     if ( SPIFFS.exists(WIFI_CONFIG) ) {
       SPIFFS.remove(WIFI_CONFIG);
     }
@@ -61,6 +62,7 @@ void saveWiFiConfig(String ssid, String pass){
     f.println(ssid);
     f.println(pass);
     f.close();
+  }
 }
 
 void loadWiFiConfig(String& ssid, String& pass){
@@ -87,6 +89,7 @@ void setupWiFiClient() {
   g_bNetworkConnected = false;
 
   WiFi.begin(ssid.c_str(), pass.c_str());
+  WiFi.mode(WIFI_STA);
   setupWiFiStatusTracker();
 }
 
@@ -119,6 +122,7 @@ void checkWiFiStatus(CTrackerParam* p){
       case WL_CONNECT_FAILED:
       case WL_CONNECTION_LOST:
       case WL_DISCONNECTED:
+        WiFi.disconnect();
         setupWiFiClient();  // retry...
         break;
       default:;

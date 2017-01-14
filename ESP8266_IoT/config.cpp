@@ -26,7 +26,7 @@ const char* WIFI_CONFIG = "/wifi_config";
 const char* WIFIAP_PASSWORD = "1234567890"; // you can see WiFi Mac Address's SSID and this is password for setup SSID/Password from web.
 
 // --- config: NTP
-const char* NTP_SERVER = "jp.pool.ntp.org";
+const char* NTP_SERVER = "time.google.com";
 
 // --- config: httpd
 int HTTP_SERVER_PORT = 80;

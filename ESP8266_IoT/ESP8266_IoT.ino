@@ -14,6 +14,10 @@
  limitations under the License.
 */
 
+extern "C" {
+#include "user_interface.h"
+}
+
 #include "base.h"
 #include "config.h"
 #include <ESP8266WiFi.h>
@@ -64,7 +68,7 @@ int g_NUM_SENSORS=0;
   #endif // ENABLE_SWITCH_FAN
 #endif // ENABLE_MQTT
 
-#define SERVO_TEST 1
+#define SERVO_TEST 0
 
 
 // --- mode changer
@@ -206,9 +210,13 @@ void setup() {
   }
 }
 
+void disableWdt(void)
+{
+  wdt_disable();
+  ESP.wdtDisable();
+}
 
 void loop() {
-  // put your main code here, to run repeatedly:
   handleWiFiClientStatus();
   handleWebServer();
   g_LooperThreadManager.handleLooperThread();
