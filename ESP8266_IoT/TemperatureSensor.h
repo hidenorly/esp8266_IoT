@@ -17,10 +17,9 @@
 #ifndef __TEMPERATURE_SENSOR_H__
 #define __TEMPERATURE_SENSOR_H__
 
-#if ENABLE_SENSOR_TEMPERATURE
+#include "config.h"
 
 #include "SensorBase.h"
-#include "config.h"
 #include "BMP180.h"
 #include "DHT11.h"
 
@@ -35,11 +34,10 @@ class TemperatureSensor:public ISensor
     virtual float getFloatValue(void);
     virtual const char* getUnit(void);
     virtual const char* getName(void);
+    virtual int getSensorType(void);
 
   protected:
     TEMPERATURE_SENSOR_DRIVER* m_pSensorDriver;
 };
-
-#endif // ENABLE_SENSOR_TEMPERATURE
 
 #endif // __TEMPERATURE_SENSOR_H__

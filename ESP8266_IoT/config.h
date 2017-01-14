@@ -34,13 +34,13 @@ extern const char* HTML_HEAD;
 #define BB  1
 #define BOX1  2
 #define BB2 3
-//#define TARGET_PRODUCT BOX1
+#define TARGET_PRODUCT BOX1
 //#define TARGET_PRODUCT BB
-#define TARGET_PRODUCT BB2
+//#define TARGET_PRODUCT BB2
 
 #if TARGET_PRODUCT == BOX1
   // --- config: MQTT
-  #define ENABLE_MQTT 0
+  #define ENABLE_MQTT 1
   #if ENABLE_MQTT
   extern const char* MQTT_SERVER;
   extern const int MQTT_SERVER_PORT;

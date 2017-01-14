@@ -61,3 +61,8 @@ const char* PressureSensor::getName(void)
   return sensorName;
 }
 
+int PressureSensor::getSensorType(void)
+{
+  return SENSOR_PRESSURE;
+}
+

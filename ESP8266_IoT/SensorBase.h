@@ -19,6 +19,14 @@
 
 #include "base.h"
 
+enum
+{
+  SENSOR_TEMPERATURE,
+  SENSOR_PRESSURE,
+  SENSOR_HUMIDITY,
+  SENSOR_NOT_ASIGNED
+};
+
 class ISensor
 {
   public:
@@ -29,6 +37,7 @@ class ISensor
     virtual float getFloatValue(void)=0;
     virtual const char* getUnit(void)=0;
     virtual const char* getName(void)=0;
+    virtual int getSensorType(void){return SENSOR_NOT_ASIGNED;};
 };
 
 #endif // __ISENSOR_H__

@@ -31,6 +31,7 @@ class HumiditySensor:public ISensor
     virtual float getFloatValue(void);
     virtual const char* getUnit(void);
     virtual const char* getName(void);
+    virtual int getSensorType(void);
 
   protected:
     DHT11* m_pSensorDriver;

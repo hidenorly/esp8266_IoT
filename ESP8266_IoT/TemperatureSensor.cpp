@@ -63,5 +63,11 @@ const char* TemperatureSensor::getName(void)
   return sensorName;
 }
 
+int TemperatureSensor::getSensorType(void)
+{
+  return SENSOR_TEMPERATURE;
+}
+
+
 #endif // ENABLE_SENSOR_TEMPERATURE
 

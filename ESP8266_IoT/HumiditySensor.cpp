@@ -61,4 +61,10 @@ const char* HumiditySensor::getName(void)
   return sensorName;
 }
 
+int HumiditySensor::getSensorType(void)
+{
+  return SENSOR_HUMIDITY;
+}
+
+
 

@@ -64,6 +64,8 @@ int g_NUM_SENSORS=0;
   #endif // ENABLE_SWITCH_FAN
 #endif // ENABLE_MQTT
 
+#define SERVO_TEST 1
+
 
 // --- mode changer
 bool initializeProperMode(){
@@ -120,16 +122,22 @@ class Poller:public LooperThreadTicker
             DEBUG_PRINTLN("]");
 
             #if ENABLE_MQTT
-            switch(i){
-              case ENABLE_SENSOR_PRESSURE-1:
+            switch(g_pSensors[i]->getSensorType()){
+              #if ENABLE_SENSOR_PRESSURE
+              case SENSOR_PRESSURE:
                 g_pressureSensor.publish(g_pSensors[i]->getFloatValue());
                 break;
-              case ENABLE_SENSOR_PRESSURE+ENABLE_SENSOR_TEMPERATURE-1:
+              #endif // ENABLE_SENSOR_PRESSURE
+              #if ENABLE_SENSOR_TEMPERATURE
+              case SENSOR_TEMPERATURE:
                 g_temperatureSensor.publish(g_pSensors[i]->getFloatValue());
                 break;
-              case ENABLE_SENSOR_PRESSURE+ENABLE_SENSOR_TEMPERATURE+ENABLE_SENSOR_HUMIDITY-1:
+              #endif // ENABLE_SENSOR_TEMPERATURE
+              #if ENABLE_SENSOR_HUMIDITY
+              case SENSOR_HUMIDITY:
                 g_humiditySensor.publish(g_pSensors[i]->getFloatValue());
                 break;
+              #endif // ENABLE_SENSOR_HUMIDITY
             }
             #endif // ENABLE_MQTT
           }
@@ -138,7 +146,7 @@ class Poller:public LooperThreadTicker
     #endif // ENABLE_SENSOR
 
     #ifdef ENABLE_SERVO
-#if 1 // SERVO TEST
+#if SERVO_TEST
     ServoManager* pServoManager = ServoManager::getInstance();
     static int d=0;
     d++;
