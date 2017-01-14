@@ -121,13 +121,13 @@ class Poller:public LooperThreadTicker
 
             #if ENABLE_MQTT
             switch(i){
-              case ENABLE_SENSOR_PRESSURE:
+              case ENABLE_SENSOR_PRESSURE-1:
                 g_pressureSensor.publish(g_pSensors[i]->getFloatValue());
                 break;
-              case 1:
+              case ENABLE_SENSOR_PRESSURE+ENABLE_SENSOR_TEMPERATURE-1:
                 g_temperatureSensor.publish(g_pSensors[i]->getFloatValue());
                 break;
-              case 2:
+              case ENABLE_SENSOR_PRESSURE+ENABLE_SENSOR_TEMPERATURE+ENABLE_SENSOR_HUMIDITY-1:
                 g_humiditySensor.publish(g_pSensors[i]->getFloatValue());
                 break;
             }
@@ -138,7 +138,7 @@ class Poller:public LooperThreadTicker
     #endif // ENABLE_SENSOR
 
     #ifdef ENABLE_SERVO
-#if 0 // SERVO TEST
+#if 1 // SERVO TEST
     ServoManager* pServoManager = ServoManager::getInstance();
     static int d=0;
     d++;

@@ -17,6 +17,8 @@
 #include "base.h"
 #include "TemperatureSensor.h"
 
+#if ENABLE_SENSOR_TEMPERATURE
+
 TemperatureSensor::TemperatureSensor():m_pSensorDriver(NULL)
 {
 }
@@ -61,4 +63,5 @@ const char* TemperatureSensor::getName(void)
   return sensorName;
 }
 
+#endif // ENABLE_SENSOR_TEMPERATURE
 

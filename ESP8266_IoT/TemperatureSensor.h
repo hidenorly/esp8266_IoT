@@ -17,6 +17,7 @@
 #ifndef __TEMPERATURE_SENSOR_H__
 #define __TEMPERATURE_SENSOR_H__
 
+#if ENABLE_SENSOR_TEMPERATURE
 
 #include "SensorBase.h"
 #include "config.h"
@@ -38,5 +39,7 @@ class TemperatureSensor:public ISensor
   protected:
     TEMPERATURE_SENSOR_DRIVER* m_pSensorDriver;
 };
+
+#endif // ENABLE_SENSOR_TEMPERATURE
 
 #endif // __TEMPERATURE_SENSOR_H__
