@@ -23,7 +23,7 @@
 class PWM
 {
   public:
-    PWM(int nGPO, int nCycleMSec, float dutyPercent=0.0f, bool bEnable=false);
+    PWM(int nGPO, int nCycleMSec, float dutyPercent=0.0f, bool bEnable=false, bool bRepeat=true, int numPulse=-1);
     ~PWM();
     void setDuty(float dutyPercent);
     void setDuty(int dutyPecent);
@@ -31,8 +31,10 @@ class PWM
     float getDuty(void);
     int getPort(void);
     int getDutyMicroSec(void);
-    void setEnableOutput(bool enable);
+    void setEnableOutput(bool enable, bool bRepeat=true, bool bRefersh=true, int numPulse=-1);
     bool getEnableOutput(void);
+    bool getEnableRepeat(void);
+    bool doneCycle(void);
     
   protected:
     void updateDutyMicroSec(float dutyPercent);
@@ -40,6 +42,8 @@ class PWM
     int mCycleMSec;
     int mDutyMicroSec;
     bool mEnable;
+    bool mRepeat;
+    int mNumPulse;
 };
 
 class PWMManager

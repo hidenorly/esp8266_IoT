@@ -60,8 +60,8 @@ void DualServoSeesawSwitch::turnOn(bool bOn)
       pServoManager->setAngle(mServo[0], SEESAW_ANGLE0);
       pServoManager->setAngle(mServo[1], -SEESAW_ANGLE1);
     }
-    pServoManager->enableServo(mServo[0], true);
-    pServoManager->enableServo(mServo[1], true);
+    pServoManager->enableServo(mServo[0], true, true, 3);
+    pServoManager->enableServo(mServo[1], true, true, 3);
   }
   mLastOn = bOn;
 }

@@ -18,7 +18,7 @@
 #include "PWM.h"
 #include "limits.h"
 
-PWM::PWM(int nGPO, int nCycleMSec, float dutyPercent, bool bEnable):mGPO(nGPO),mCycleMSec(nCycleMSec),mEnable(bEnable)
+PWM::PWM(int nGPO, int nCycleMSec, float dutyPercent, bool bEnable, bool bRepeat, int numPulse):mGPO(nGPO),mCycleMSec(nCycleMSec),mEnable(bEnable),mRepeat(bRepeat), mNumPulse(numPulse)
 {
   setOutputAndValue(nGPO, LOW);
   updateDutyMicroSec(dutyPercent);
@@ -76,12 +76,16 @@ void PWM::updateDutyMicroSec(float dutyPercent)
   mDutyMicroSec = (mCycleMSec * dutyPercent * 10);
 }
 
-void PWM::setEnableOutput(bool enable)
+void PWM::setEnableOutput(bool enable, bool bRepeat, bool bRefersh, int numPulse)
 {
+  mRepeat = bRepeat;
+  mNumPulse = numPulse;
   if( mEnable != enable){
     mEnable=enable;
-    PWMManager* pManager = PWMManager::getInstance();
-    pManager->setPWMCycle();
+    if( bRefersh ){
+      PWMManager* pManager = PWMManager::getInstance();
+      pManager->setPWMCycle();
+    }
   }
 }
 
@@ -90,7 +94,22 @@ bool PWM::getEnableOutput(void)
   return mEnable;
 }
 
+bool PWM::getEnableRepeat(void)
+{
+  return mRepeat;
+}
 
+bool PWM::doneCycle(void)
+{
+  if( !mRepeat ){
+    mNumPulse--;
+    if(mNumPulse<0){
+      setEnableOutput(false, false, false, -1);
+      return false;
+    }
+  }
+  return true;
+}
 
 // --- PWM Data Manager
 PWMManager* PWMManager::mpThis = NULL;
@@ -222,6 +241,7 @@ void PWMManager::tick(void)
     AutoDisableInterrupt();
     int nPWM = mpPWMs.size();
     bool bFound=false;
+    bool bDonePWM=false;
     do {
       bFound=false;
       unsigned long nowDelta = micros() - start_time;
@@ -230,6 +250,7 @@ void PWMManager::tick(void)
         if( NULL != pPWM && pPWM->getEnableOutput() ){
           if( pPWM->getDutyMicroSec() < nowDelta ){
             digitalWrite(pPWM->getPort(), LOW);
+            bDonePWM |= !pPWM->doneCycle();
 /*          
             DEBUG_PRINT("PWM:");
             DEBUG_PRINT(pPWM->getDutyMicroSec());
@@ -245,6 +266,9 @@ void PWMManager::tick(void)
         }
       }
     } while(bFound);
+    if( bDonePWM ){
+      setPWMCycle();
+    }
   }
 }
 

@@ -25,7 +25,7 @@ class IServo
     IServo(int nGPO, float initialAngle=0.0f){};
     virtual ~IServo(){};
     virtual void setAngle(float angle)=0;
-    virtual void enable(bool bEnable)=0;
+    virtual void enable(bool bEnable, bool bRepeat=true, int nCycles=-1)=0;
 };
 
 class ServoManager
@@ -37,7 +37,7 @@ class ServoManager
     void removeServo(int nServo);
     void terminate(void);
     void setAngle(int nServo, float angle);
-    void enableServo(int nServo, bool bEnable);
+    void enableServo(int nServo, bool bEnable, bool bRepeat=true, int nCycles=-1);
 
   protected:
     ServoManager();
