@@ -63,15 +63,9 @@ void initializeGPIO(void) {
   setOutputAndValue(4, HIGH);
 #endif // ENABLE_DHT11
   setOutputAndValue(5, HIGH);
-#ifdef ENABLE_SERVO
-  setOutputAndValue(12, LOW);
-  setOutputAndValue(13, LOW);
-  ServoManager* pServoManager = ServoManager::getInstance();
-  DEBUG_PRINTLN( pServoManager->addServo( new ServoDriverSG90D(12) ) );
-  DEBUG_PRINTLN( pServoManager->addServo( new ServoDriverSG90D(13) ) );
-#else // ENABLE_SERVO
-  setOutputAndValue(12, HIGH);
-  setOutputAndValue(13, HIGH);
+#ifndef ENABLE_SERVO
+  setOutputAndValue(GPO_SERVO_SWITCH1, HIGH);
+  setOutputAndValue(GPO_SERVO_SWITCH2, HIGH);
 #endif
 #ifndef ENABLE_I2C_BUS
   setOutputAndValue(14, HIGH);

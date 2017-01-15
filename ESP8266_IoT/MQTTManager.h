@@ -52,9 +52,9 @@ class MQTTManager
 {
   public:
     static void initialize(const char* server, uint16_t port, const char* username, const char* password, bool bSecure=false);
+    static void terminate(void);
     static MQTT_CLIENT* referClient(void);
     static MQTTManager* getInstance(void);
-    static void releaseInstance(void);
     void addPublisher(int key, const char *feed);
     MQTT_PUBLISHER* getPublisher(int key);
     void addSubscriber(int key, const char *feed);
@@ -68,7 +68,6 @@ class MQTTManager
   protected:
     MQTTManager();
     ~MQTTManager();
-    static void cleanUp(void);
 
     static TemplateArray<MQTTPubContainer> mpMQTTPub;
     static TemplateArray<MQTTSubContainer> mpMQTTSub;
@@ -76,7 +75,6 @@ class MQTTManager
     static MQTTManager* mpThis;
     static MQTT_CLIENT* mpClient;
     static Client* mpWiFiClient;
-    static int mRefCount;
 };
 
 

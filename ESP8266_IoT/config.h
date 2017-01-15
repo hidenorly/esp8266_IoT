@@ -38,6 +38,9 @@ extern const char* HTML_HEAD;
 #define TARGET_PRODUCT BB
 //#define TARGET_PRODUCT BB2
 
+#define GPO_SERVO_SWITCH1 12
+#define GPO_SERVO_SWITCH2 13
+
 #if TARGET_PRODUCT == BOX1
   // --- config: MQTT
   #define ENABLE_MQTT 1

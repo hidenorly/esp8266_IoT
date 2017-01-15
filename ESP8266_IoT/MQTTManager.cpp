@@ -23,7 +23,6 @@ TemplateArray<MQTTSubContainer> MQTTManager::mpMQTTSub(8);
 MQTTManager* MQTTManager::mpThis = NULL;
 MQTT_CLIENT* MQTTManager::mpClient = NULL;
 Client* MQTTManager::mpWiFiClient = NULL;
-int MQTTManager::mRefCount = 0;
 
 
 MQTTManager::MQTTManager()
@@ -32,7 +31,7 @@ MQTTManager::MQTTManager()
 
 MQTTManager::~MQTTManager()
 {
-  cleanUp();
+  terminate();
 }
 
 void MQTTManager::initialize(const char* server, uint16_t port, const char* username, const char* password, bool bSecure)
@@ -66,11 +65,10 @@ MQTTManager* MQTTManager::getInstance(void)
   if( NULL==mpThis ){
     mpThis = new MQTTManager();
   }
-  mRefCount++;
   return mpThis;
 }
 
-void MQTTManager::cleanUp(void)
+void MQTTManager::terminate(void)
 {
   // clean up publisher instance
   for(int i=0; i<mpMQTTPub.size(); i++){
@@ -96,16 +94,7 @@ void MQTTManager::cleanUp(void)
 
   MQTTManager* pThis = mpThis;
   mpThis = NULL;
-  mRefCount = 0;
   delete mpThis;
-}
-
-void MQTTManager::releaseInstance(void)
-{
-  mRefCount--;
-  if( mRefCount<= 0 ){
-    cleanUp();
-  }
 }
 
 void MQTTManager::addPublisher(int key, const char *feed)

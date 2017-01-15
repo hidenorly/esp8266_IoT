@@ -32,7 +32,7 @@ extern "C" {
 #include <FS.h>
 #include <Time.h>
 #include <TimeLib.h>
-#include "ServoManager.h"
+#include "ServoSwitch.h"
 #include "MQTTManager.h"
 
 #define DEBUG_PRINT(...) Serial.print(__VA_ARGS__)
@@ -67,9 +67,6 @@ int g_NUM_SENSORS=0;
     #endif // ENABLE_SWITCH_FAN
   }
 #endif // ENABLE_MQTT
-
-
-#define SERVO_TEST 0
 
 
 // --- mode changer
@@ -138,23 +135,6 @@ class Poller:public LooperThreadTicker
         }
       }
     #endif // ENABLE_SENSOR
-
-    #ifdef ENABLE_SERVO
-#if SERVO_TEST
-    ServoManager* pServoManager = ServoManager::getInstance();
-    static int d=0;
-    d++;
-    if( d & 0x01 ){
-      pServoManager->setAngle(0, 30.0f);
-      pServoManager->setAngle(1, -15.0f);
-    } else {
-      pServoManager->setAngle(0, 15.0f);
-      pServoManager->setAngle(1, -30.0f);
-    }
-    pServoManager->enableServo(0, true);
-    pServoManager->enableServo(1, true);
-#endif
-    #endif // ENABLE_SERVO
     }
 };
 
@@ -219,8 +199,10 @@ void loop() {
     int subscriberKey=0;
     if( gpMQTTManager->handleSubscriber(subscriberKey) ){
       if( subscriberKey==0 ){
-        Serial.print("Got: ");
-        Serial.println(gpMQTTManager->getLastSubscriberValue(subscriberKey));
+        const char* result = gpMQTTManager->getLastSubscriberValue(subscriberKey);
+        DEBUG_PRINT("Switch request: "); DEBUG_PRINTLN(result);
+        static DualServoSeesawSwitch seesawSwitch(GPO_SERVO_SWITCH1,GPO_SERVO_SWITCH2);
+        seesawSwitch.turnOn( (result[0]=='1') ? true : false );
       }
     }
   }
