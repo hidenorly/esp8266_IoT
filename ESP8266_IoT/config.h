@@ -34,8 +34,8 @@ extern const char* HTML_HEAD;
 #define BB  1
 #define BOX1  2
 #define BB2 3
-#define TARGET_PRODUCT BOX1
-//#define TARGET_PRODUCT BB
+//#define TARGET_PRODUCT BOX1
+#define TARGET_PRODUCT BB
 //#define TARGET_PRODUCT BB2
 
 #if TARGET_PRODUCT == BOX1

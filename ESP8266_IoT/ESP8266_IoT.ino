@@ -1,5 +1,5 @@
 /* 
- Copyright (C) 2016 hidenorly
+ Copyright (C) 2016,2017 hidenorly
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ extern "C" {
 #include <Time.h>
 #include <TimeLib.h>
 #include "ServoManager.h"
+#include "MQTTManager.h"
 
 #include <Adafruit_MQTT.h>
 #include <Adafruit_MQTT_Client.h>
@@ -54,19 +55,25 @@ int g_NUM_SENSORS=0;
   #endif // ENABLE_SSL_MQTT
   Adafruit_MQTT_Client g_mqtt(&g_MQTTClient, MQTT_SERVER, MQTT_SERVER_PORT, MQTT_USERNAME, MQTT_PASSWORD);
 
-  #if ENABLE_SENSOR_PRESSURE
-  Adafruit_MQTT_Publish g_pressureSensor = Adafruit_MQTT_Publish(&g_mqtt, MQTT_CLIENTID"sensor/pressure");
-  #endif // ENABLE_SENSOR_PRESSURE
-  #if ENABLE_SENSOR_TEMPERATURE
-  Adafruit_MQTT_Publish g_temperatureSensor = Adafruit_MQTT_Publish(&g_mqtt, MQTT_CLIENTID"sensor/temperature");
-  #endif // ENABLE_SENSOR_TEMPERATURE
-  #if ENABLE_SENSOR_HUMIDITY
-  Adafruit_MQTT_Publish g_humiditySensor = Adafruit_MQTT_Publish(&g_mqtt, MQTT_CLIENTID"sensor/humidity");
-  #endif // ENABLE_SENSOR_HUMIDITY
   #if ENABLE_SWITCH_FAN
-  Adafruit_MQTT_Subscribe g_fanSwitch = Adafruit_MQTT_Subscribe(&g_mqtt, MQTT_CLIENTID"switch/fan");
+    Adafruit_MQTT_Subscribe g_fanSwitch = Adafruit_MQTT_Subscribe(&g_mqtt, MQTT_CLIENTID"switch/fan");
   #endif // ENABLE_SWITCH_FAN
+
+  MQTTManager* gpMQTTManager = MQTTManager::getInstance();
+  void setupMQTT(void)
+  {
+    #if ENABLE_SENSOR_PRESSURE
+      gpMQTTManager->addPublisher(SENSOR_PRESSURE, new Adafruit_MQTT_Publish(&g_mqtt, MQTT_CLIENTID"sensor/pressure"));
+    #endif // ENABLE_SENSOR_PRESSURE
+    #if ENABLE_SENSOR_TEMPERATURE
+      gpMQTTManager->addPublisher(SENSOR_TEMPERATURE, new Adafruit_MQTT_Publish(&g_mqtt, MQTT_CLIENTID"sensor/temperature"));
+    #endif // ENABLE_SENSOR_TEMPERATURE
+    #if ENABLE_SENSOR_HUMIDITY
+      gpMQTTManager->addPublisher(SENSOR_HUMIDITY, new Adafruit_MQTT_Publish(&g_mqtt, MQTT_CLIENTID"sensor/humidity"));
+    #endif // ENABLE_SENSOR_HUMIDITY
+  }
 #endif // ENABLE_MQTT
+
 
 #define SERVO_TEST 0
 
@@ -126,22 +133,11 @@ class Poller:public LooperThreadTicker
             DEBUG_PRINTLN("]");
 
             #if ENABLE_MQTT
-            switch(g_pSensors[i]->getSensorType()){
-              #if ENABLE_SENSOR_PRESSURE
-              case SENSOR_PRESSURE:
-                g_pressureSensor.publish(g_pSensors[i]->getFloatValue());
-                break;
-              #endif // ENABLE_SENSOR_PRESSURE
-              #if ENABLE_SENSOR_TEMPERATURE
-              case SENSOR_TEMPERATURE:
-                g_temperatureSensor.publish(g_pSensors[i]->getFloatValue());
-                break;
-              #endif // ENABLE_SENSOR_TEMPERATURE
-              #if ENABLE_SENSOR_HUMIDITY
-              case SENSOR_HUMIDITY:
-                g_humiditySensor.publish(g_pSensors[i]->getFloatValue());
-                break;
-              #endif // ENABLE_SENSOR_HUMIDITY
+            if( gpMQTTManager ) {
+              Adafruit_MQTT_Publish* pPublisher = gpMQTTManager->getPublisher(g_pSensors[i]->getSensorType());
+              if( pPublisher ){
+                pPublisher->publish(g_pSensors[i]->getFloatValue());
+              }
             }
             #endif // ENABLE_MQTT
           }
@@ -204,7 +200,10 @@ void setup() {
     DEBUG_PRINT(n);
     DEBUG_PRINTLN(" sensors are initialized.");
   #endif // ENABLE_SENSOR
-  
+
+  #if ENABLE_MQTT
+    setupMQTT();
+  #endif // ENABLE_MQTT
     static Poller* sPoll=new Poller(1000);
     g_LooperThreadManager.add(sPoll);
   }
@@ -217,6 +216,7 @@ void disableWdt(void)
 }
 
 void loop() {
+  Serial.printf("loop heap size: %u\r\n", ESP.getFreeHeap());
   handleWiFiClientStatus();
   handleWebServer();
   g_LooperThreadManager.handleLooperThread();

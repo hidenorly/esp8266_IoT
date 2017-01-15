@@ -1,5 +1,5 @@
 /* 
- Copyright (C) 2016 hidenorly
+ Copyright (C) 2016,2017 hidenorly
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -90,4 +90,7 @@ template class TemplateArray<PWM>;
 
 #include "ServoManager.h"
 template class TemplateArray<IServo>;
+
+#include "MQTTManager.h"
+template class TemplateArray<MQTTContainer>;
 

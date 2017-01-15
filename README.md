@@ -46,7 +46,6 @@ $ git archive HEAD --output=../NTP.zip
 # Confirmed environment
 
 * ESP WROOM02
-* ESP-07/12E
 
 ## Arduino configuration
 
@@ -56,7 +55,12 @@ $ git archive HEAD --output=../NTP.zip
 * Flash Mode : DIO (default)
 * Flash Frequency : 40MHz (default)
 * CPU Frequency : 80MHz (default)
-* Flash Size : 512k (64K SPIFFS) (default)
+* Flash Size : 512k (64K SPIFFS)
+  * Please check your devcice's flash size
+    * ESP-07: 512k
+    * ESP-12E: 1M
+    * WROOM-02/ESP-12F: 1M or 4M
+    * etc.
 * Debug port : disabled (default)
 * Debug level : nothing (default)
 * Reset Method : ck (default)
