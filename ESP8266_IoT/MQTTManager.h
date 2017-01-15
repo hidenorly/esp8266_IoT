@@ -19,40 +19,63 @@
 
 #include "base.h"
 #include "TemplateArray.h"
+#include "Client.h"
 
 #define USE_ADAFRUIT_MQTT 1
 
 #ifdef USE_ADAFRUIT_MQTT
   #include <Adafruit_MQTT.h>
   #include <Adafruit_MQTT_Client.h>
+  #define MQTT_CLIENT Adafruit_MQTT_Client
   #define MQTT_PUBLISHER Adafruit_MQTT_Publish
+  #define MQTT_SUBSCRIBER Adafruit_MQTT_Subscribe
 #endif
 
-class MQTTContainer
+class MQTTPubContainer
 {
   public:
-    MQTTContainer(int key, MQTT_PUBLISHER* pPublish):key(key),pPublish(pPublish){};
-    ~MQTTContainer(){};
+    MQTTPubContainer(int key, MQTT_PUBLISHER* pPublish):key(key),pPublish(pPublish){};
+    ~MQTTPubContainer(){};
     int key;
     MQTT_PUBLISHER* pPublish;
+};
+class MQTTSubContainer
+{
+  public:
+    MQTTSubContainer(int key, MQTT_SUBSCRIBER* pSubscriber):key(key),pSubscriber(pSubscriber){};
+    ~MQTTSubContainer(){};
+    int key;
+    MQTT_SUBSCRIBER* pSubscriber;
 };
 
 class MQTTManager
 {
   public:
+    static void initialize(const char* server, uint16_t port, const char* username, const char* password, bool bSecure=false);
+    static MQTT_CLIENT* referClient(void);
     static MQTTManager* getInstance(void);
     static void releaseInstance(void);
-    void addPublisher(int key, MQTT_PUBLISHER* pPublish);
+    void addPublisher(int key, const char *feed);
     MQTT_PUBLISHER* getPublisher(int key);
+    void addSubscriber(int key, const char *feed);
+    MQTT_SUBSCRIBER* getSubscriber(int key);
+    void enableSubscriber(int key, bool bEnable=true);
+    bool handleSubscriber(int& receivedSubscriberKey, int nTimeOut=5);
+    const char* getLastSubscriberValue(int key);
+    void connect(void);
+    void disconnect(void);
 
   protected:
     MQTTManager();
     ~MQTTManager();
     static void cleanUp(void);
 
-    static TemplateArray<MQTTContainer> mpMQTT;
+    static TemplateArray<MQTTPubContainer> mpMQTTPub;
+    static TemplateArray<MQTTSubContainer> mpMQTTSub;
 
     static MQTTManager* mpThis;
+    static MQTT_CLIENT* mpClient;
+    static Client* mpWiFiClient;
     static int mRefCount;
 };
 

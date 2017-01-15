@@ -92,5 +92,6 @@ template class TemplateArray<PWM>;
 template class TemplateArray<IServo>;
 
 #include "MQTTManager.h"
-template class TemplateArray<MQTTContainer>;
+template class TemplateArray<MQTTPubContainer>;
+template class TemplateArray<MQTTSubContainer>;
 

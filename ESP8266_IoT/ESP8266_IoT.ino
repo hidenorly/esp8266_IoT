@@ -35,9 +35,6 @@ extern "C" {
 #include "ServoManager.h"
 #include "MQTTManager.h"
 
-#include <Adafruit_MQTT.h>
-#include <Adafruit_MQTT_Client.h>
-
 #define DEBUG_PRINT(...) Serial.print(__VA_ARGS__)
 #define DEBUG_PRINTLN(...) Serial.println(__VA_ARGS__)
 
@@ -48,29 +45,26 @@ int g_NUM_SENSORS=0;
 #endif // ENABLE_SENSOR
 
 #if ENABLE_MQTT
-  #if ENABLE_SSL_MQTT
-    WiFiClientSecure g_MQTTClient;
-  #else // ENABLE_SSL_MQTT
-    WiFiClient g_MQTTClient;
-  #endif // ENABLE_SSL_MQTT
-  Adafruit_MQTT_Client g_mqtt(&g_MQTTClient, MQTT_SERVER, MQTT_SERVER_PORT, MQTT_USERNAME, MQTT_PASSWORD);
-
-  #if ENABLE_SWITCH_FAN
-    Adafruit_MQTT_Subscribe g_fanSwitch = Adafruit_MQTT_Subscribe(&g_mqtt, MQTT_CLIENTID"switch/fan");
-  #endif // ENABLE_SWITCH_FAN
-
   MQTTManager* gpMQTTManager = MQTTManager::getInstance();
   void setupMQTT(void)
   {
+    MQTTManager::initialize(MQTT_SERVER, MQTT_SERVER_PORT, MQTT_USERNAME, MQTT_PASSWORD);
+
+    // create MQTT publisher
     #if ENABLE_SENSOR_PRESSURE
-      gpMQTTManager->addPublisher(SENSOR_PRESSURE, new Adafruit_MQTT_Publish(&g_mqtt, MQTT_CLIENTID"sensor/pressure"));
+      gpMQTTManager->addPublisher(SENSOR_PRESSURE, MQTT_CLIENTID"sensor/pressure");
     #endif // ENABLE_SENSOR_PRESSURE
     #if ENABLE_SENSOR_TEMPERATURE
-      gpMQTTManager->addPublisher(SENSOR_TEMPERATURE, new Adafruit_MQTT_Publish(&g_mqtt, MQTT_CLIENTID"sensor/temperature"));
+      gpMQTTManager->addPublisher(SENSOR_TEMPERATURE, MQTT_CLIENTID"sensor/temperature");
     #endif // ENABLE_SENSOR_TEMPERATURE
     #if ENABLE_SENSOR_HUMIDITY
-      gpMQTTManager->addPublisher(SENSOR_HUMIDITY, new Adafruit_MQTT_Publish(&g_mqtt, MQTT_CLIENTID"sensor/humidity"));
+      gpMQTTManager->addPublisher(SENSOR_HUMIDITY, MQTT_CLIENTID"sensor/humidity");
     #endif // ENABLE_SENSOR_HUMIDITY
+
+    // create MQTT subscriber
+    #if ENABLE_SWITCH_FAN
+      gpMQTTManager->addSubscriber(0, MQTT_CLIENTID"switch/fan");
+    #endif // ENABLE_SWITCH_FAN
   }
 #endif // ENABLE_MQTT
 
@@ -100,9 +94,9 @@ void onWiFiClientConnected(){
   start_NTP(); // socket related is need to be executed in main loop.
   #if ENABLE_MQTT
   #if ENABLE_SWITCH_FAN
-  g_mqtt.subscribe(&g_fanSwitch);
+  gpMQTTManager->enableSubscriber(0, true);
   #endif // ENABLE_SWITCH_FAN
-  g_mqtt.connect();
+  gpMQTTManager->connect();
   #endif // ENABLE_MQTT
 }
 
@@ -134,7 +128,7 @@ class Poller:public LooperThreadTicker
 
             #if ENABLE_MQTT
             if( gpMQTTManager ) {
-              Adafruit_MQTT_Publish* pPublisher = gpMQTTManager->getPublisher(g_pSensors[i]->getSensorType());
+              MQTT_PUBLISHER* pPublisher = gpMQTTManager->getPublisher(g_pSensors[i]->getSensorType());
               if( pPublisher ){
                 pPublisher->publish(g_pSensors[i]->getFloatValue());
               }
@@ -216,20 +210,18 @@ void disableWdt(void)
 }
 
 void loop() {
-  Serial.printf("loop heap size: %u\r\n", ESP.getFreeHeap());
+//  Serial.printf("loop heap size: %u\r\n", ESP.getFreeHeap());
   handleWiFiClientStatus();
   handleWebServer();
   g_LooperThreadManager.handleLooperThread();
 
-  #if ENABLE_MQTT
-  Adafruit_MQTT_Subscribe *subscription;
-  while ((subscription = g_mqtt.readSubscription(5))) {
-  #if ENABLE_SWITCH_FAN
-    if (subscription == &g_fanSwitch) {
-      Serial.print("Got: ");
-      Serial.println((char *)g_fanSwitch.lastread);
+  if( gpMQTTManager ) {
+    int subscriberKey=0;
+    if( gpMQTTManager->handleSubscriber(subscriberKey) ){
+      if( subscriberKey==0 ){
+        Serial.print("Got: ");
+        Serial.println(gpMQTTManager->getLastSubscriberValue(subscriberKey));
+      }
     }
-  #endif // ENABLE_SWITCH_FAN
   }
-  #endif // ENABLE_MQTT
 }
