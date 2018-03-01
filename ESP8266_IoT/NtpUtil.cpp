@@ -41,13 +41,13 @@ void NtpStatusTracker::doCallback(void)
   if( year(n) == 1970 ) {
     // NTP is not succeeded
     if( !mbInitialized1 ){
-      setSyncInterval(10);
+      setSyncInterval(20);  // per 20 sec polling is required more than 16sec.
       mbInitialized1 = true;
     }
   } else {
     // after successful to set NTPed time on system
     if( !mbInitialized2 ){
-      setSyncInterval(300);
+      setSyncInterval(60*5);  // per 5 min
       mbInitialized2 = true;
     }
   }

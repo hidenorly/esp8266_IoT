@@ -1,5 +1,5 @@
 /* 
- Copyright (C) 2016 hidenorly
+ Copyright (C) 2016,2018 hidenorly
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -41,6 +41,11 @@ const char* MQTT_USERNAME = "username";
 const char* MQTT_PASSWORD = "password";
 #endif // ENABLE_MQTT
 
+// --- config: OTA
+#ifdef ENABLE_OTA
+const int OTA_PIN = MODE_PIN; // GPIO0
+#endif // ENABLE_OTA
+
 // --- GPIO config
 void initializeGPIO(void) {
   // General config : BOOT MODE (GPIO0,2,15) related
@@ -54,7 +59,7 @@ void initializeGPIO(void) {
   pinMode(15, INPUT);
 
   // Project related config
-  pinMode(MODE_PIN, INPUT); // GPIO0 is for switching mode Low: WiFi AP Mode (Config) / High: WiFi Client (Normal)
+  pinMode(MODE_PIN, INPUT_PULLUP); // GPIO0 is for switching mode Low: WiFi AP Mode (Config) / High: WiFi Client (Normal)
 
   // If pin is NC, we should set {output / High} or {input / pull up enabled} on the pin.
 #if ENABLE_SENSOR_HUMIDITY

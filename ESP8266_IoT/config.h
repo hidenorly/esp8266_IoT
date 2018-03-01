@@ -41,6 +41,15 @@ extern const char* HTML_HEAD;
 #define GPO_SERVO_SWITCH1 12
 #define GPO_SERVO_SWITCH2 13
 
+#define ENABLE_UPNP
+#define ENABLE_OTA
+
+#ifdef ENABLE_OTA
+// --- config: OTA
+extern const int OTA_PIN;
+#define OTA_PIN_PERIOD  5000
+#endif // ENABLE_OTA
+
 #if TARGET_PRODUCT == BOX1
   // --- config: MQTT
   #define ENABLE_MQTT 1

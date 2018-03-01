@@ -122,7 +122,6 @@ void checkWiFiStatus(CTrackerParam* p){
       case WL_CONNECT_FAILED:
       case WL_CONNECTION_LOST:
       case WL_DISCONNECTED:
-        WiFi.disconnect();
         setupWiFiClient();  // retry...
         break;
       default:;

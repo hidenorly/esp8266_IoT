@@ -1,5 +1,5 @@
 /* 
- Copyright (C) 2016,2017 hidenorly
+ Copyright (C) 2016, 2017, 2018 hidenorly
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -20,6 +20,9 @@ extern "C" {
 
 #include "base.h"
 #include "config.h"
+
+#include <Arduino.h>
+
 #include <ESP8266WiFi.h>
 #include "WiFiUtil.h"
 #include "WebConfig.h"
@@ -28,6 +31,7 @@ extern "C" {
 #include "PressureSensor.h"
 #include "TemperatureSensor.h"
 #include "HumiditySensor.h"
+#include "OtaManager.h"
 
 #include <FS.h>
 #include <Time.h>
@@ -68,10 +72,18 @@ int g_NUM_SENSORS=0;
   }
 #endif // ENABLE_MQTT
 
+// --- UPnP Device
+#ifdef ENABLE_UPNP
+#include "Ssdp.h"
+#include "UPnPDeviceWiFiSwitch.h"
+
+static Ssdp* g_pSsdp=NULL;
+static UPnPDevice* g_pSwitch1=NULL;
+#endif // ENABLE_UPNP
 
 // --- mode changer
-bool initializeProperMode(){
-  if( (digitalRead(MODE_PIN) == 0) || (!SPIFFS.exists(WIFI_CONFIG)) ){
+bool initializeProperMode(bool bSPIFFS){
+  if( !bSPIFFS || (digitalRead(MODE_PIN) == 0) || (!SPIFFS.exists(WIFI_CONFIG))){
     // setup because WiFi AP mode is specified or WIFI_CONFIG is not found.
     setupWiFiAP();
     setup_httpd();
@@ -95,6 +107,19 @@ void onWiFiClientConnected(){
   #endif // ENABLE_SWITCH_FAN
   gpMQTTManager->connect();
   #endif // ENABLE_MQTT
+
+  #ifdef ENABLE_UPNP
+  if(g_pSsdp){
+    if(!g_pSwitch1){
+      g_pSwitch1 = new UPnPDeviceWiFiSwitch("test", 31415, "Belkin:device:**", "38323636-4558-4dda-9188-cda0e6aabbcc", "/setup.xml");
+    }
+    if(g_pSwitch1){
+      g_pSwitch1->enable(true);
+      g_pSsdp->addUPnPDevice(g_pSwitch1);
+    }
+    g_pSsdp->enable(true);
+  }
+  #endif // ENABLE_UPNP
 }
 
 class Poller:public LooperThreadTicker
@@ -148,11 +173,17 @@ void setup() {
   Serial.begin(115200);
 
   // Initialize SPI File System
-  SPIFFS.begin();
+  bool bSPIFFS = SPIFFS.begin();
+  if(!bSPIFFS){
+    SPIFFS.format();
+  }
 
   // Check mode
   delay(1000);
-  if(initializeProperMode()){
+  if(initializeProperMode(bSPIFFS)){
+  #ifdef ENABLE_UPNP
+    g_pSsdp = new Ssdp();
+  #endif // ENABLE_UPNP
   #ifdef ENABLE_SENSOR
     // Initialize sensor
     int n=0;
@@ -206,4 +237,17 @@ void loop() {
       }
     }
   }
+
+  #ifdef ENABLE_OTA
+  // OTA
+  static OtaManager ota(OTA_PIN, OTA_PIN_PERIOD);
+  ota.handle();
+  #endif // ENABLE_OTA
+
+  #ifdef ENABLE_UPNP
+  // UPnP
+  if(g_pSsdp && g_pSsdp->getEnabled()){
+    g_pSsdp->handle();
+  }
+  #endif // ENABLE_UPNP
 }
