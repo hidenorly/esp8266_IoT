@@ -11,6 +11,8 @@ This base code includes:
  - Sensor Framework
    - BMP180 (Pressure and Temperature sensor)
    - DHT11 (Humidity and Temperature sensor)
+ - OTA (Over The Air firmware update. Push Mode button for more than 5 sec, it's enabled for 5 minutes. The threshold are configurable.)
+ - SSDP & UPnP
 
 # Instruction
 
@@ -105,6 +107,12 @@ const char* HTML_HEAD = "<html><head><title>hidenorly's ESP8266</title></head><b
 #define ENABLE_SENSOR_PRESSURE 1
 #define ENABLE_SENSOR_TEMPERATURE 1
 #define ENABLE_SENSOR_HUMIDITY 1
+
+// --- config: enable SSDP & UPnP
+#define ENABLE_UPNP
+
+// --- config: enable OTA
+#define ENABLE_OTA
 ```
 
 # How to setup
