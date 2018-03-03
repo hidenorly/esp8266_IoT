@@ -62,3 +62,27 @@ int StringUtil::find(String& in, String key, int nStartPos)
   return pos;
 }
 
+String StringUtil::toHex(int inData)
+{
+	char szBuf[5];
+	sprintf(szBuf, "%04x", inData);
+	return String(szBuf);
+}
+
+bool StringUtil::isHex(String inData)
+{
+	bool result = true;
+	const char* szBuf = inData.c_str();
+	for(int i=0; (result && *szBuf && i<inData.length()); i++ ){
+		char atData = *szBuf;
+		result = isHex(atData);
+		szBuf++;
+	}
+	return result;
+}
+
+bool StringUtil::isHex(char atData)
+{
+	return ( ( atData >= '0' && atData<='9') || (atData>='a' && atData<='f') || (atData>='A' && atData<='F') );
+}
+

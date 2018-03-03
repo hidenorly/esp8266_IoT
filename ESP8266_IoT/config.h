@@ -45,12 +45,9 @@ extern const char* HTML_HEAD;
 // --- board configs
 #define BB  1
 #define BOX1  2
-#define WEMOSD1 4
 
-#define TARGET_PRODUCT BOX1
-//#define TARGET_PRODUCT BB
-//#define TARGET_PRODUCT WEMOSD1
-
+//#define TARGET_PRODUCT BOX1
+#define TARGET_PRODUCT BB
 
 #if TARGET_PRODUCT == BOX1
   // --- config: MQTT
@@ -80,7 +77,7 @@ extern const char* HTML_HEAD;
 
 #else // TARGET_PRODUCT
 
-  #define ENABLE_MQTT
+//  #define ENABLE_MQTT
   
   // --- config: sensor support
   #define ENABLE_SENSOR_PRESSURE 0     // 1 Require BMP180

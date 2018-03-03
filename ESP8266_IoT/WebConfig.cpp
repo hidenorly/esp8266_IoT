@@ -1,5 +1,5 @@
 /* 
- Copyright (C) 2016 hidenorly
+ Copyright (C) 2016,2018 hidenorly
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -78,6 +78,10 @@ void httpd_handleRootPost() {
         html += HTML_TAIL;
   
         g_pHttpd->send(200, "text/html", html);
+
+        delay(1000*3);
+
+        ESP.restart();
       }
     } else {
       // SSID & Password are NOT specified.

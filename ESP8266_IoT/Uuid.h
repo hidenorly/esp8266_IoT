@@ -14,19 +14,18 @@
  limitations under the License.
 */
 
-#ifndef __STRINGUTIL_H__
-#define __STRINGUTIL_H__
+#ifndef __UUID_H__
+#define __UUID_H__
 
-#include "base.h"
-
-class StringUtil
+class Uuid
 {
 public:
-	static bool inInclude(char* buf, int nSize, char* checkString);
-	static int find(String& in, String key, int nStartPos);
-	static String toHex(int inData);
-	static bool isHex(String inData);
-	static bool isHex(char atData);
+	static String generateUuid(void);
+	static String getUuidByName(String name);
+	static bool isUuid(String uuid);
+
+private:
+	static bool isShouldHypen(int index);
 };
 
-#endif /* __STRINGUTIL_H__ */
+#endif /* __UUID_H__ */

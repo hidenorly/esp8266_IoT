@@ -57,6 +57,7 @@ MQTTManager* gpMQTTManager = MQTTManager::getInstance();
 #ifdef ENABLE_UPNP
 #include "Ssdp.h"
 #include "UPnPDeviceWiFiSwitch.h"
+#include "Uuid.h"
 
 static Ssdp* g_pSsdp=NULL;
 static UPnPDevice* g_pSwitch1=NULL;
@@ -111,23 +112,26 @@ void setupSensors(void)
 }
 #endif // ENABLE_SENSOR
 
-// --- handler for WiFi client enabled
-void onWiFiClientConnected(){
-  DEBUG_PRINTLN("WiFi connected.");
-  DEBUG_PRINT("IP address: ");
-  DEBUG_PRINTLN(WiFi.localIP());
-  start_NTP(); // socket related is need to be executed in main loop.
-  #ifdef ENABLE_MQTT
+#ifdef ENABLE_MQTT
+void setup2_MQTT(void)
+{
   #if ENABLE_SWITCH_FAN
   gpMQTTManager->enableSubscriber(0, true);
   #endif // ENABLE_SWITCH_FAN
   gpMQTTManager->connect();
-  #endif // ENABLE_MQTT
+}
+#endif
 
-  #ifdef ENABLE_UPNP
+#ifdef ENABLE_UPNP
+void setup2_upnp(void)
+{
   if(g_pSsdp){
     if(!g_pSwitch1){
-      g_pSwitch1 = new UPnPDeviceWiFiSwitch("test", 31415, "Belkin:device:**", "38323636-4558-4dda-9188-cda0e6aabbcc", "/setup.xml");
+      String uuid = Uuid::getUuidByName("test");
+      DEBUG_PRINT("UUID=");
+      DEBUG_PRINTLN(uuid);
+
+      g_pSwitch1 = new UPnPDeviceWiFiSwitch("test", 31415, "Belkin:device:**", uuid, "/setup.xml");
     }
     if(g_pSwitch1){
       g_pSwitch1->enable(true);
@@ -135,6 +139,24 @@ void onWiFiClientConnected(){
     }
     g_pSsdp->enable(true);
   }
+}
+#endif // ENABLE_UPNP
+
+
+// --- handler for WiFi client enabled
+void onWiFiClientConnected(){
+  DEBUG_PRINTLN("WiFi connected.");
+  DEBUG_PRINT("IP address: ");
+  DEBUG_PRINTLN(WiFi.localIP());
+  start_NTP(); // socket related is need to be executed in main loop.
+  setup_httpd();
+
+  #ifdef ENABLE_MQTT
+  setup2_MQTT();
+  #endif // ENABLE_MQTT
+
+  #ifdef ENABLE_UPNP
+  setup2_upnp();
   #endif // ENABLE_UPNP
 }
 
@@ -147,8 +169,7 @@ bool initializeProperMode(bool bSPIFFS){
     setup_httpd();
     return false;
   } else {
-    setupWiFiClient();
-    setup_httpd();  // comment this out if you don't need to have httpd on WiFi client mode
+    setupWiFiClient(); // httpd will be enabled after WiFi is connected
   }
   return true;
 }

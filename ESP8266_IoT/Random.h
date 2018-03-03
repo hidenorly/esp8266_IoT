@@ -14,19 +14,17 @@
  limitations under the License.
 */
 
-#ifndef __STRINGUTIL_H__
-#define __STRINGUTIL_H__
+#ifndef __RANDOM_H__
+#define __RANDOM_H__
 
-#include "base.h"
+#include <limits.h>
+#include <esp8266_peri.h>
 
-class StringUtil
+class Random
 {
 public:
-	static bool inInclude(char* buf, int nSize, char* checkString);
-	static int find(String& in, String key, int nStartPos);
-	static String toHex(int inData);
-	static bool isHex(String inData);
-	static bool isHex(char atData);
+	static void initialize(void){ randomSeed(RANDOM_REG32); };
+	static int getRandom(int range=INT_MAX){ return random(range); }; 
 };
 
-#endif /* __STRINGUTIL_H__ */
+#endif /* __RANDOM_H__ */
