@@ -1,5 +1,5 @@
 /* 
- Copyright (C) 2016 hidenorly
+ Copyright (C) 2016,2018 hidenorly
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
 */
 
 #include "ServoDrvSG90D.h"
+
+#ifdef ENABLE_SERVO
 
 ServoDriverSG90D::ServoDriverSG90D(int nGPO, float initialAngle):IServo(nGPO, initialAngle)
 {
@@ -48,4 +50,6 @@ void ServoDriverSG90D::enable(bool bEnable, bool bRepeat, int nCycles)
 {
   mPWM->setEnableOutput(bEnable, bRepeat, true, nCycles);
 }
+
+#endif // ifdef ENABLE_SERVO
 

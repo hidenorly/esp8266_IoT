@@ -1,5 +1,5 @@
 /* 
- Copyright (C) 2016 hidenorly
+ Copyright (C) 2016,2018 hidenorly
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@
 #define __TEMPERATURE_SENSOR_H__
 
 #include "config.h"
+
+#ifdef ENABLE_SENSOR
+#if ENABLE_SENSOR_TEMPERATURE
 
 #include "SensorBase.h"
 #include "BMP180.h"
@@ -39,5 +42,8 @@ class TemperatureSensor:public ISensor
   protected:
     TEMPERATURE_SENSOR_DRIVER* m_pSensorDriver;
 };
+
+#endif // ENABLE_SENSOR_TEMPERATURE
+#endif // ENABLE_SENSOR
 
 #endif // __TEMPERATURE_SENSOR_H__

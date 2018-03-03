@@ -17,6 +17,8 @@
 #ifndef __SERVO_MANAGER_H__
 #define __SERVO_MANAGER_H__
 
+#ifdef ENABLE_SERVO
+
 #include "TemplateArray.h"
 
 class IServo
@@ -47,5 +49,7 @@ class ServoManager
     static TemplateArray<IServo> mpServos;
     static ServoManager* mpThis;
 };
+
+#endif // ENABLE_SERVO
 
 #endif // __SERVO_MANAGER_H__

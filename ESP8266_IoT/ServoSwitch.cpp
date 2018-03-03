@@ -1,5 +1,5 @@
 /* 
- Copyright (C) 2017 hidenorly
+ Copyright (C) 2017,2018 hidenorly
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -13,6 +13,11 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 */
+
+#include "base.h"
+
+#ifdef ENABLE_SERVO
+#ifdef ENABLE_SERVO_SWITCH
 
 #include "ServoSwitch.h"
 #include "ServoManager.h"
@@ -65,3 +70,6 @@ void DualServoSeesawSwitch::turnOn(bool bOn)
   }
   mLastOn = bOn;
 }
+
+#endif // ENABLE_SERVO_SWITCH
+#endif // ENABLE_SERVO

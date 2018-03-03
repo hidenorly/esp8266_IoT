@@ -1,5 +1,5 @@
 /* 
- Copyright (C) 2016 hidenorly
+ Copyright (C) 2016,2018 hidenorly
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
 */
 
 #include "base.h"
+
+#ifdef ENABLE_SERVO
+
 #include "ServoManager.h"
 
 // --- Servo Data Manager
@@ -99,3 +102,4 @@ void ServoManager::enableServo(int nServo, bool bEnable, bool bRepeat, int nCycl
   }
 }
 
+#endif // ENABLE_SERVO

@@ -15,6 +15,9 @@
 */
 
 #include "base.h"
+
+#ifdef ENABLE_OTA
+
 #define NO_GLOBAL_ARDUINOOTA
 #include <ArduinoOTA.h>
 #include "OtaManager.h"
@@ -128,3 +131,5 @@ OtaManager::OTA_STATUS OtaManager::getOtaStatus(void)
 {
 	return mStatus;
 }
+
+#endif // ENABLE_OTA

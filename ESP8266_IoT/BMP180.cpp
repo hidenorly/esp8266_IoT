@@ -1,5 +1,5 @@
 /* 
- Copyright (C) 2016 hidenorly
+ Copyright (C) 2016,2018 hidenorly
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -15,6 +15,10 @@
 */
 
 #include "base.h"
+
+#ifdef ENABLE_SENSOR
+#if ENABLE_SENSOR_PRESSURE || ENABLE_SENSOR_TEMPERATURE
+
 #include "BMP180.h"
 
 // static members declaration with initial value
@@ -149,4 +153,7 @@ float BMP180::getTemperature(void)
   doRead();
   return (float) mTemp / 10.0f;
 }
+
+#endif // ENABLE_SENSOR_PRESSURE || ENABLE_SENSOR_TEMPERATURE
+#endif // ENABLE_SENSOR
 

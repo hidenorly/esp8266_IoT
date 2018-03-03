@@ -1,5 +1,5 @@
 /* 
- Copyright (C) 2016 hidenorly
+ Copyright (C) 2016,2018 hidenorly
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -17,6 +17,10 @@
 #ifndef __SERVODRV_SG90D_H__
 #define __SERVODRV_SG90D_H__
 
+#include "base.h"
+
+#ifdef ENABLE_SERVO
+
 #include "ServoManager.h"
 #include "PWM.h"
 
@@ -31,5 +35,7 @@ class ServoDriverSG90D:public IServo
   protected:
     PWM* mPWM;
 };
+
+#endif // ENABLE_SERVO
 
 #endif // __SERVODRV_SG90D_H__

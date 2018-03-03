@@ -17,6 +17,10 @@
 #ifndef __HUMIDITY_SENSOR_H__
 #define __HUMIDITY_SENSOR_H__
 
+#include "base.h"
+#ifdef ENABLE_SENSOR
+#if ENABLE_SENSOR_HUMIDITY
+
 #include "SensorBase.h"
 #include "DHT11.h"
 
@@ -36,5 +40,9 @@ class HumiditySensor:public ISensor
   protected:
     DHT11* m_pSensorDriver;
 };
+
+#endif // ENABLE_SENSOR_HUMIDITY
+#endif // ENABLE_SENSOR
+
 
 #endif // __HUMIDITY_SENSOR_H__

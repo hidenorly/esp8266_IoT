@@ -1,5 +1,5 @@
 /* 
- Copyright (C) 2017 hidenorly
+ Copyright (C) 2017,2018 hidenorly
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -20,6 +20,9 @@
 #include "base.h"
 #include "ISwitch.h"
 
+#ifdef ENABLE_SERVO
+#ifdef ENABLE_SERVO_SWITCH
+
 class DualServoSeesawSwitch : public ISwitch
 {
 public:
@@ -29,5 +32,8 @@ public:
 protected:
   int mServo[2];
 };
+
+#endif // ENABLE_SERVO_SWITCH
+#endif // ENABLE_SERVO
 
 #endif//__SERVO_SWITCH_H__

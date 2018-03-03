@@ -42,34 +42,15 @@ extern "C" {
 #define DEBUG_PRINT(...) Serial.print(__VA_ARGS__)
 #define DEBUG_PRINTLN(...) Serial.println(__VA_ARGS__)
 
+// --- global variable definition
 #ifdef ENABLE_SENSOR
 #define NUM_OF_SENSORS  (ENABLE_SENSOR_PRESSURE+ENABLE_SENSOR_TEMPERATURE+ENABLE_SENSOR_HUMIDITY)
 ISensor* g_pSensors[NUM_OF_SENSORS];
 int g_NUM_SENSORS=0;
 #endif // ENABLE_SENSOR
 
-#if ENABLE_MQTT
-  MQTTManager* gpMQTTManager = MQTTManager::getInstance();
-  void setupMQTT(void)
-  {
-    MQTTManager::initialize(MQTT_SERVER, MQTT_SERVER_PORT, MQTT_USERNAME, MQTT_PASSWORD);
-
-    // create MQTT publisher
-    #if ENABLE_SENSOR_PRESSURE
-      gpMQTTManager->addPublisher(SENSOR_PRESSURE, MQTT_CLIENTID"sensor/pressure");
-    #endif // ENABLE_SENSOR_PRESSURE
-    #if ENABLE_SENSOR_TEMPERATURE
-      gpMQTTManager->addPublisher(SENSOR_TEMPERATURE, MQTT_CLIENTID"sensor/temperature");
-    #endif // ENABLE_SENSOR_TEMPERATURE
-    #if ENABLE_SENSOR_HUMIDITY
-      gpMQTTManager->addPublisher(SENSOR_HUMIDITY, MQTT_CLIENTID"sensor/humidity");
-    #endif // ENABLE_SENSOR_HUMIDITY
-
-    // create MQTT subscriber
-    #if ENABLE_SWITCH_FAN
-      gpMQTTManager->addSubscriber(0, MQTT_CLIENTID"switch/fan");
-    #endif // ENABLE_SWITCH_FAN
-  }
+#ifdef ENABLE_MQTT
+MQTTManager* gpMQTTManager = MQTTManager::getInstance();
 #endif // ENABLE_MQTT
 
 // --- UPnP Device
@@ -81,19 +62,54 @@ static Ssdp* g_pSsdp=NULL;
 static UPnPDevice* g_pSwitch1=NULL;
 #endif // ENABLE_UPNP
 
-// --- mode changer
-bool initializeProperMode(bool bSPIFFS){
-  if( !bSPIFFS || (digitalRead(MODE_PIN) == 0) || (!SPIFFS.exists(WIFI_CONFIG))){
-    // setup because WiFi AP mode is specified or WIFI_CONFIG is not found.
-    setupWiFiAP();
-    setup_httpd();
-    return false;
-  } else {
-    setupWiFiClient();
-    setup_httpd();  // comment this out if you don't need to have httpd on WiFi client mode
+// --- per feature setup
+#ifdef ENABLE_MQTT
+void setupMQTT(void)
+{
+  MQTTManager::initialize(MQTT_SERVER, MQTT_SERVER_PORT, MQTT_USERNAME, MQTT_PASSWORD);
+
+  // create MQTT publisher
+  #if ENABLE_SENSOR_PRESSURE
+    gpMQTTManager->addPublisher(SENSOR_PRESSURE, MQTT_CLIENTID"sensor/pressure");
+  #endif // ENABLE_SENSOR_PRESSURE
+  #if ENABLE_SENSOR_TEMPERATURE
+    gpMQTTManager->addPublisher(SENSOR_TEMPERATURE, MQTT_CLIENTID"sensor/temperature");
+  #endif // ENABLE_SENSOR_TEMPERATURE
+  #if ENABLE_SENSOR_HUMIDITY
+    gpMQTTManager->addPublisher(SENSOR_HUMIDITY, MQTT_CLIENTID"sensor/humidity");
+  #endif // ENABLE_SENSOR_HUMIDITY
+
+  // create MQTT subscriber
+  #if ENABLE_SWITCH_FAN
+    gpMQTTManager->addSubscriber(0, MQTT_CLIENTID"switch/fan");
+  #endif // ENABLE_SWITCH_FAN
   }
-  return true;
+#endif // ENABLE_MQTT
+
+#ifdef ENABLE_SENSOR
+void setupSensors(void)
+{
+    // Initialize sensor
+    int n=0;
+  #if ENABLE_SENSOR_PRESSURE
+    g_pSensors[n++] = new PressureSensor();
+  #endif // ENABLE_SENSOR_PRESSURE
+  #if ENABLE_SENSOR_TEMPERATURE
+    g_pSensors[n++] = new TemperatureSensor();
+  #endif // ENABLE_SENSOR_TEMPERATURE
+  #if ENABLE_SENSOR_HUMIDITY
+    g_pSensors[n++] = new HumiditySensor();
+  #endif // ENABLE_SENSOR_HUMIDITY
+    g_NUM_SENSORS = n;
+    for(int i=0; i<n; i++){
+      DEBUG_PRINT("Init:");
+      DEBUG_PRINTLN(g_pSensors[i]->getName());
+      g_pSensors[i]->initialize();
+    }
+    DEBUG_PRINT(n);
+    DEBUG_PRINTLN(" sensors are initialized.");
 }
+#endif // ENABLE_SENSOR
 
 // --- handler for WiFi client enabled
 void onWiFiClientConnected(){
@@ -101,7 +117,7 @@ void onWiFiClientConnected(){
   DEBUG_PRINT("IP address: ");
   DEBUG_PRINTLN(WiFi.localIP());
   start_NTP(); // socket related is need to be executed in main loop.
-  #if ENABLE_MQTT
+  #ifdef ENABLE_MQTT
   #if ENABLE_SWITCH_FAN
   gpMQTTManager->enableSubscriber(0, true);
   #endif // ENABLE_SWITCH_FAN
@@ -120,6 +136,21 @@ void onWiFiClientConnected(){
     g_pSsdp->enable(true);
   }
   #endif // ENABLE_UPNP
+}
+
+
+// --- mode changer
+bool initializeProperMode(bool bSPIFFS){
+  if( !bSPIFFS || (digitalRead(MODE_PIN) == 0) || (!SPIFFS.exists(WIFI_CONFIG))){
+    // setup because WiFi AP mode is specified or WIFI_CONFIG is not found.
+    setupWiFiAP();
+    setup_httpd();
+    return false;
+  } else {
+    setupWiFiClient();
+    setup_httpd();  // comment this out if you don't need to have httpd on WiFi client mode
+  }
+  return true;
 }
 
 class Poller:public LooperThreadTicker
@@ -148,7 +179,7 @@ class Poller:public LooperThreadTicker
             DEBUG_PRINT(g_pSensors[i]->getUnit());
             DEBUG_PRINTLN("]");
 
-            #if ENABLE_MQTT
+            #ifdef ENABLE_MQTT
             if( gpMQTTManager ) {
               MQTT_PUBLISHER* pPublisher = gpMQTTManager->getPublisher(g_pSensors[i]->getSensorType());
               if( pPublisher ){
@@ -162,7 +193,6 @@ class Poller:public LooperThreadTicker
     #endif // ENABLE_SENSOR
     }
 };
-
 
 // --- General setup() function
 void setup() {
@@ -184,29 +214,12 @@ void setup() {
   #ifdef ENABLE_UPNP
     g_pSsdp = new Ssdp();
   #endif // ENABLE_UPNP
+
   #ifdef ENABLE_SENSOR
-    // Initialize sensor
-    int n=0;
-  #if ENABLE_SENSOR_PRESSURE
-    g_pSensors[n++] = new PressureSensor();
-  #endif // ENABLE_SENSOR_PRESSURE
-  #if ENABLE_SENSOR_TEMPERATURE
-    g_pSensors[n++] = new TemperatureSensor();
-  #endif // ENABLE_SENSOR_TEMPERATURE
-  #if ENABLE_SENSOR_HUMIDITY
-    g_pSensors[n++] = new HumiditySensor();
-  #endif // ENABLE_SENSOR_HUMIDITY
-    g_NUM_SENSORS = n;
-    for(int i=0; i<n; i++){
-      DEBUG_PRINT("Init:");
-      DEBUG_PRINTLN(g_pSensors[i]->getName());
-      g_pSensors[i]->initialize();
-    }
-    DEBUG_PRINT(n);
-    DEBUG_PRINTLN(" sensors are initialized.");
+  setupSensors();
   #endif // ENABLE_SENSOR
 
-  #if ENABLE_MQTT
+  #ifdef ENABLE_MQTT
     setupMQTT();
   #endif // ENABLE_MQTT
     static Poller* sPoll=new Poller(1000);
@@ -226,17 +239,23 @@ void loop() {
   handleWebServer();
   g_LooperThreadManager.handleLooperThread();
 
+  #ifdef ENABLE_MQTT
   if( gpMQTTManager ) {
     int subscriberKey=0;
     if( gpMQTTManager->handleSubscriber(subscriberKey) ){
       if( subscriberKey==0 ){
         const char* result = gpMQTTManager->getLastSubscriberValue(subscriberKey);
         DEBUG_PRINT("Switch request: "); DEBUG_PRINTLN(result);
+        #ifdef ENABLE_SERVO
+        #if ENABLE_SWITCH_FAN
         static DualServoSeesawSwitch seesawSwitch(GPO_SERVO_SWITCH1,GPO_SERVO_SWITCH2);
         seesawSwitch.turnOn( (result[0]=='1') ? true : false );
+        #endif // ENABLE_SWITCH_FAN
+        #endif // ENABLE_SERVO
       }
     }
   }
+  #endif // ENABLE_MQTT
 
   #ifdef ENABLE_OTA
   // OTA

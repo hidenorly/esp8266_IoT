@@ -1,5 +1,5 @@
 /* 
- Copyright (C) 2016 hidenorly
+ Copyright (C) 2016,2018 hidenorly
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -31,109 +31,116 @@ extern const char* NTP_SERVER;
 extern int HTTP_SERVER_PORT;
 extern const char* HTML_HEAD;
 
-#define BB  1
-#define BOX1  2
-#define BB2 3
-//#define TARGET_PRODUCT BOX1
-#define TARGET_PRODUCT BB
-//#define TARGET_PRODUCT BB2
-
-#define GPO_SERVO_SWITCH1 12
-#define GPO_SERVO_SWITCH2 13
-
+// --- config: UPnP
 #define ENABLE_UPNP
+
+// --- config: OTA
 #define ENABLE_OTA
 
 #ifdef ENABLE_OTA
-// --- config: OTA
-extern const int OTA_PIN;
-#define OTA_PIN_PERIOD  5000
+  extern const int OTA_PIN;
+  #define OTA_PIN_PERIOD  5000
 #endif // ENABLE_OTA
+
+// --- board configs
+#define BB  1
+#define BOX1  2
+#define WEMOSD1 4
+
+#define TARGET_PRODUCT BOX1
+//#define TARGET_PRODUCT BB
+//#define TARGET_PRODUCT WEMOSD1
+
 
 #if TARGET_PRODUCT == BOX1
   // --- config: MQTT
-  #define ENABLE_MQTT 1
-  #if ENABLE_MQTT
-  extern const char* MQTT_SERVER;
-  extern const int MQTT_SERVER_PORT;
-  //extern const char* MQTT_CLIENTID;
-  #define MQTT_CLIENTID "/hidenorly/"
-  extern const char* MQTT_USERNAME;
-  extern const char* MQTT_PASSWORD;
-  #endif // ENABLE_MQTT
+  #define ENABLE_MQTT
   
   // --- config: sensor support
-  //#define ENABLE_I2C_BUS
-  #define ENABLE_SENSOR
-  #define ENABLE_SENSOR_PRESSURE 0
-  #define ENABLE_SENSOR_TEMPERATURE 1
-  #define ENABLE_SENSOR_HUMIDITY 1
-  #define TEMPERATURE_SENSOR_DRIVER DHT11
-  
+  #define ENABLE_SENSOR_PRESSURE 0     // 1 Require BMP180
+  #define ENABLE_SENSOR_HUMIDITY 1     // 1 Require DHT11
+
+  #define ENABLE_SENSOR_TEMPERATURE 1 // 1 Require BMP180 or DHT11
+  #if ENABLE_SENSOR_TEMPERATURE
+//  #define TEMPERATURE_SENSOR_DRIVER BMP180 // Require ENABLE_I2C_BUS
+    #define TEMPERATURE_SENSOR_DRIVER DHT11
+  #endif // ENABLE_SENSOR_TEMPERATURE
+
   // --- config: servo support
-  #define ENABLE_SERVO
-  
+  #define ENABLE_SERVO // require ENABLE_PWM 
+
   // --- config: fan sw
   #define ENABLE_SWITCH_FAN 1
+  #define ENABLE_SERVO_SWITCH
 
-#elif TARGET_PRODUCT == BB2 // TARGET_PRODUCT
-
-  // --- config: MQTT
-  #define ENABLE_MQTT 0
-  #if ENABLE_MQTT
-  extern const char* MQTT_SERVER;
-  extern const int MQTT_SERVER_PORT;
-  //extern const char* MQTT_CLIENTID;
-  #define MQTT_CLIENTID "/hidenorly/"
-  extern const char* MQTT_USERNAME;
-  extern const char* MQTT_PASSWORD;
-  #endif // ENABLE_MQTT
-  
-  // --- config: sensor support
-  //#define ENABLE_I2C_BUS
-  //#define ENABLE_SENSOR
-  //#define ENABLE_SENSOR_PRESSURE 0
-  //#define ENABLE_SENSOR_TEMPERATURE 1
-  //#define ENABLE_SENSOR_HUMIDITY 1
-  //#define TEMPERATURE_SENSOR_DRIVER DHT11
-  
-  // --- config: servo support
-  //#define ENABLE_SERVO
-  
-  // --- config: fan sw
-  //#define ENABLE_SWITCH_FAN 1
+  #ifdef ENABLE_SERVO_SWITCH
+    #define GPO_SERVO_SWITCH1 12
+    #define GPO_SERVO_SWITCH2 13
+  #endif // ENABLE_SERVO_SWITCH
 
 #else // TARGET_PRODUCT
 
-  // --- config: MQTT
-  #define ENABLE_MQTT 1
-  #if ENABLE_MQTT
-  extern const char* MQTT_SERVER;
-  extern const int MQTT_SERVER_PORT;
-  //extern const char* MQTT_CLIENTID;
-  #define MQTT_CLIENTID "/hidenorly/"
-  extern const char* MQTT_USERNAME;
-  extern const char* MQTT_PASSWORD;
-  #endif // ENABLE_MQTT
+  #define ENABLE_MQTT
   
   // --- config: sensor support
-  #define ENABLE_I2C_BUS
-  #define ENABLE_SENSOR
-  #define ENABLE_SENSOR_PRESSURE 1
-  #define ENABLE_SENSOR_TEMPERATURE 1
-  #define ENABLE_SENSOR_HUMIDITY 1
-  #define TEMPERATURE_SENSOR_DRIVER BMP180
-  //#define TEMPERATURE_SENSOR_DRIVER DHT11
+  #define ENABLE_SENSOR_PRESSURE 0     // 1 Require BMP180
+  #define ENABLE_SENSOR_HUMIDITY 0     // 1 Require DHT11
+
+  #define ENABLE_SENSOR_TEMPERATURE 0 // 1 Require TEMPERATURE_SENSOR_DRIVER
+  #if ENABLE_SENSOR_TEMPERATURE
+//  #define TEMPERATURE_SENSOR_DRIVER BMP180 // Require ENABLE_I2C_BUS
+//  #define TEMPERATURE_SENSOR_DRIVER DHT11
+  #endif // ENABLE_SENSOR_TEMPERATURE
+
+  #if ENABLE_SENSOR_PRESSURE || ENABLE_SENSOR_TEMPERATURE || ENABLE_SENSOR_HUMIDITY
+    #define ENABLE_SENSOR  // Require at least one ENABLE_SENSOR_XXXX = 1
+  #endif // ENABLE_SENSOR_PRESSURE || ENABLE_SENSOR_TEMPERATURE || ENABLE_SENSOR_HUMIDITY
   
   // --- config: servo support
-  #define ENABLE_SERVO
+//  #define ENABLE_SERVO // require ENABLE_PWM
   
   // --- config: fan sw
-  #define ENABLE_SWITCH_FAN 1
+//  #define ENABLE_SWITCH_FAN 1 // Require ENABLE_SERVO
 #endif // TARGET_PRODUCT
 
 // --- GPIO initial setup
 void initializeGPIO(void);
 
-#endif // __CONFIG_H__
 
+// --- config: MQTT
+#ifdef ENABLE_MQTT
+  extern const char* MQTT_SERVER;
+  extern const int MQTT_SERVER_PORT;
+  //extern const char* MQTT_CLIENTID;
+  #define MQTT_CLIENTID "/hidenorly/"
+  extern const char* MQTT_USERNAME;
+  extern const char* MQTT_PASSWORD;
+#endif // ENABLE_MQTT
+
+// --- sensors dependency
+#if ENABLE_SENSOR_PRESSURE || ENABLE_SENSOR_TEMPERATURE || ENABLE_SENSOR_HUMIDITY
+  #ifndef ENABLE_SENSOR
+    #define ENABLE_SENSOR  // Require at least one ENABLE_SENSOR_XXXX = 1
+  #endif // ENABLE_SENSOR
+#endif // ENABLE_SENSOR_PRESSURE || ENABLE_SENSOR_TEMPERATURE || ENABLE_SENSOR_HUMIDITY
+
+// ENABLE_SERVO_SWITCH dependency
+#ifdef ENABLE_SERVO_SWITCH
+  #define ENABLE_SERVO
+#endif // ENABLE_SERVO_SWITCH
+
+// --- SERVO dependency
+#ifdef ENABLE_SERVO
+  #ifndef ENABLE_PWM
+    #define ENABLE_PWM
+  #endif // ENABLE_PWM
+#endif // ENABLE_SERVO
+
+// BMP180 dependency
+#if TEMPERATURE_SENSOR_DRIVER==BMP180
+  #ifndef ENABLE_I2C_BUS
+    #define ENABLE_I2C_BUS
+  #endif // ENABLE_I2C_BUS
+#endif // TEMPERATURE_SENSOR_DRIVER
+
+#endif // __CONFIG_H__

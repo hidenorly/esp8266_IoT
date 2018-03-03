@@ -82,20 +82,30 @@ int TemplateArray<T>::size(void)
 #include "LooperThreadTicker.h"
 template class TemplateArray<LooperThreadTicker>;
 
+#ifdef ENABLE_SENSOR
 #include "SensorManager.h"
 template class TemplateArray<ISensor>;
+#endif // ENABLE_SENSOR
 
+#ifdef ENABLE_PWM
 #include "PWM.h"
 template class TemplateArray<PWM>;
+#endif // ENABLE_PWM
 
+#ifdef ENABLE_SERVO
 #include "ServoManager.h"
 template class TemplateArray<IServo>;
+#endif // ENABLE_SERVO
 
+#ifdef ENABLE_MQTT
 #include "MQTTManager.h"
 template class TemplateArray<MQTTPubContainer>;
 template class TemplateArray<MQTTSubContainer>;
+#endif // ENABLE_MQTT
 
+#ifdef ENABLE_UPNP
 #include "Ssdp.h"
 template class TemplateArray<UPnPDevice>;
+#endif // ENABLE_UPNP
 
 

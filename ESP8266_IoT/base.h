@@ -1,5 +1,5 @@
 /* 
- Copyright (C) 2016 hidenorly
+ Copyright (C) 20162,2018 hidenorly
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 #define __BASE_H__
 
 #include "Arduino.h"
+#include "config.h"
 
 // --- debug macro
 #define ENABLE_DEBUG 1

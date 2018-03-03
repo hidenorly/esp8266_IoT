@@ -1,5 +1,5 @@
 /* 
- Copyright (C) 2017 hidenorly
+ Copyright (C) 2017,2018 hidenorly
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@
 #define __MQTTMANAGER_H__
 
 #include "base.h"
+
+#ifdef ENABLE_MQTT
+
 #include "TemplateArray.h"
 #include "Client.h"
 
@@ -77,5 +80,6 @@ class MQTTManager
     static Client* mpWiFiClient;
 };
 
+#endif // ENABLE_MQTT
 
 #endif // __MQTTMANAGER_H__

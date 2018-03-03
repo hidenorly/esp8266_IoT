@@ -16,7 +16,6 @@
 
 #include "base.h"
 #include "config.h"
-#include "ServoDrvSG90D.h"
 
 // --- config
 const int MODE_PIN = 0; // GPIO0 {Low: WiFi AP / High: WiFi Client}
@@ -33,7 +32,7 @@ int HTTP_SERVER_PORT = 80;
 const char* HTML_HEAD = "<html><head><title>hidenorly's ESP8266</title></head><body>";
 
 // --- config: MQTT
-#if ENABLE_MQTT
+#ifdef ENABLE_MQTT
 const char* MQTT_SERVER = "192.168.10.31";
 const int MQTT_SERVER_PORT = 1883;
 //const char* MQTT_CLIENTID = "_hidenoly_client_id";
@@ -68,10 +67,10 @@ void initializeGPIO(void) {
   setOutputAndValue(4, HIGH);
 #endif // ENABLE_DHT11
   setOutputAndValue(5, HIGH);
-#ifndef ENABLE_SERVO
-  setOutputAndValue(GPO_SERVO_SWITCH1, HIGH);
-  setOutputAndValue(GPO_SERVO_SWITCH2, HIGH);
-#endif
+#ifndef ENABLE_SERVO_SWITCH
+  setOutputAndValue(12, HIGH); // GPO_SERVO_SWITCH1 if ENABLE_SERVO_SWITCH
+  setOutputAndValue(13, HIGH); // GPO_SERVO_SWITCH2 if ENABLE_SERVO_SWITCH
+#endif // ENABLE_SERVO_SWITCH
 #ifndef ENABLE_I2C_BUS
   setOutputAndValue(14, HIGH);
 #endif // ENABLE_I2C_BUS

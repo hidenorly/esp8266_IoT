@@ -1,5 +1,5 @@
 /* 
- Copyright (C) 2016 hidenorly
+ Copyright (C) 2016,2018 hidenorly
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 
 #ifndef __PWM_H__
 #define __PWM_H__
+
+#include "base.h"
+
+#ifdef ENABLE_PWM
 
 #include "TemplateArray.h"
 #include "LooperThreadTicker.h"
@@ -76,4 +80,6 @@ class PWMManager
 public:
   void tick(void);
 };
+
+#endif // ENABLE_PWM
 #endif // __PWM_H__

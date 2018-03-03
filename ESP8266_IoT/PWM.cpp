@@ -1,5 +1,5 @@
 /* 
- Copyright (C) 2016 hidenorly
+ Copyright (C) 2016,2018 hidenorly
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
 */
 
 #include "base.h"
+
+#ifdef ENABLE_PWM
+
 #include "PWM.h"
 #include "limits.h"
 
@@ -272,4 +275,4 @@ void PWMManager::tick(void)
   }
 }
 
-
+#endif // ENABLE_PWM

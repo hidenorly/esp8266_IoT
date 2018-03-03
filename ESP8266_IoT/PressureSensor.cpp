@@ -1,5 +1,5 @@
 /* 
- Copyright (C) 2016 hidenorly
+ Copyright (C) 2016,2018 hidenorly
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -15,6 +15,10 @@
 */
 
 #include "base.h"
+
+#ifdef ENABLE_SENSOR
+#if ENABLE_SENSOR_PRESSURE
+
 #include "PressureSensor.h"
 
 PressureSensor::PressureSensor():m_pSensorDriver(NULL)
@@ -66,3 +70,5 @@ int PressureSensor::getSensorType(void)
   return SENSOR_PRESSURE;
 }
 
+#endif // ENABLE_SENSOR_PRESSURE
+#endif // ENABLE_SENSOR
